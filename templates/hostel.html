@@ -1,0 +1,1175 @@
+{% extends "base.html" %}
+
+{% block title %}Hostel Management - College ERP System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hostel-container {
+        padding: 2rem 0;
+        min-height: calc(100vh - 80px);
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        animation: fadeInDown 1s ease-out;
+    }
+
+    .page-title {
+        font-size: 3rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+    }
+
+    .page-subtitle {
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 400;
+    }
+
+    /* Hostel Overview Stats */
+    .hostel-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0.1s; }
+    .stat-card:nth-child(2) { animation-delay: 0.2s; }
+    .stat-card:nth-child(3) { animation-delay: 0.3s; }
+    .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+    .stat-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: pulse 2s infinite;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #333;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .stat-label {
+        color: #666;
+        font-weight: 600;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Hostel Floor Plans */
+    .floor-plans {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 3rem;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideInUp 0.8s ease-out;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .floor-tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        justify-content: center;
+    }
+
+    .floor-tab {
+        padding: 1rem 2rem;
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        border-radius: 12px;
+        background: rgba(102, 126, 234, 0.05);
+        color: #667eea;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .floor-tab.active {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .floor-tab:hover:not(.active) {
+        border-color: #667eea;
+        transform: translateY(-2px);
+    }
+
+    .floor-plan {
+        display: none;
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 2rem;
+        border: 2px solid #e9ecef;
+    }
+
+    .floor-plan.active {
+        display: block;
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    .rooms-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1rem;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .room {
+        aspect-ratio: 1;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .room::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .room:hover::before {
+        opacity: 1;
+    }
+
+    .room:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .room.available {
+        background: linear-gradient(135deg, #d4edda, #c3e6cb);
+        border-color: #56ab2f;
+    }
+
+    .room.occupied {
+        background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+        border-color: #ff416c;
+    }
+
+    .room.maintenance {
+        background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+        border-color: #ffc107;
+    }
+
+    .room-number {
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: #333;
+        margin-bottom: 0.25rem;
+    }
+
+    .room-status {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .room-available {
+        color: #56ab2f;
+    }
+
+    .room-occupied {
+        color: #ff416c;
+    }
+
+    .room-maintenance {
+        color: #ffc107;
+    }
+
+    .room-capacity {
+        font-size: 0.6rem;
+        color: #666;
+        margin-top: 0.25rem;
+    }
+
+    /* Room Details Modal */
+    .room-modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    .room-modal-content {
+        background: white;
+        margin: 5% auto;
+        padding: 2rem;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 600px;
+        position: relative;
+        animation: slideInDown 0.3s ease-out;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .room-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .room-modal-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #333;
+    }
+
+    .close-room-modal {
+        font-size: 2rem;
+        cursor: pointer;
+        color: #666;
+        transition: color 0.3s ease;
+    }
+
+    .close-room-modal:hover {
+        color: #ff416c;
+    }
+
+    .room-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .room-detail-item {
+        padding: 1rem;
+        background: rgba(102, 126, 234, 0.05);
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
+    }
+
+    .room-detail-label {
+        font-weight: 600;
+        color: #666;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.25rem;
+    }
+
+    .room-detail-value {
+        font-weight: 700;
+        color: #333;
+        font-size: 1.1rem;
+    }
+
+    .room-occupants {
+        margin-bottom: 2rem;
+    }
+
+    .occupant-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        border: 1px solid #e9ecef;
+    }
+
+    .occupant-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+    }
+
+    .occupant-info {
+        flex: 1;
+    }
+
+    .occupant-name {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.25rem;
+    }
+
+    .occupant-id {
+        font-size: 0.8rem;
+        color: #666;
+    }
+
+    /* Hostel Management Section */
+    .hostel-management {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideInUp 0.8s ease-out;
+    }
+
+    .management-tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .management-tab {
+        padding: 1rem 2rem;
+        border: none;
+        background: none;
+        color: #666;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-bottom: 3px solid transparent;
+    }
+
+    .management-tab.active {
+        color: #667eea;
+        border-bottom-color: #667eea;
+    }
+
+    .management-tab:hover {
+        color: #667eea;
+    }
+
+    .management-content {
+        display: none;
+    }
+
+    .management-content.active {
+        display: block;
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    /* Rooms Table */
+    .rooms-table-container {
+        overflow-x: auto;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .rooms-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .rooms-table th {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        font-weight: 600;
+        padding: 1.5rem 1rem;
+        text-align: left;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .rooms-table td {
+        padding: 1.5rem 1rem;
+        border-bottom: 1px solid #f0f0f0;
+        vertical-align: middle;
+    }
+
+    .rooms-table tr {
+        transition: all 0.3s ease;
+    }
+
+    .rooms-table tr:hover {
+        background: rgba(102, 126, 234, 0.05);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .rooms-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Status Badges */
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-available {
+        background: rgba(86, 171, 47, 0.1);
+        color: #56ab2f;
+        border: 2px solid rgba(86, 171, 47, 0.2);
+    }
+
+    .status-occupied {
+        background: rgba(255, 65, 108, 0.1);
+        color: #ff416c;
+        border: 2px solid rgba(255, 65, 108, 0.2);
+    }
+
+    .status-maintenance {
+        background: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+        border: 2px solid rgba(255, 193, 7, 0.2);
+    }
+
+    /* Occupancy Indicator */
+    .occupancy-indicator {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .occupancy-bar {
+        width: 100px;
+        height: 8px;
+        background: rgba(102, 126, 234, 0.1);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .occupancy-fill {
+        height: 100%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        transition: width 0.3s ease;
+    }
+
+    .occupancy-text {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #333;
+        min-width: 40px;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-view {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        border: 1px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .btn-view:hover {
+        background: #667eea;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-allocate {
+        background: rgba(86, 171, 47, 0.1);
+        color: #56ab2f;
+        border: 1px solid rgba(86, 171, 47, 0.2);
+    }
+
+    .btn-allocate:hover {
+        background: #56ab2f;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-maintenance {
+        background: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+        border: 1px solid rgba(255, 193, 7, 0.2);
+    }
+
+    .btn-maintenance:hover {
+        background: #ffc107;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .hostel-stats {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .floor-tabs {
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .floor-tab {
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .rooms-grid {
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        }
+
+        .management-tabs {
+            flex-wrap: wrap;
+        }
+
+        .room-details {
+            grid-template-columns: 1fr;
+        }
+
+        .rooms-table-container {
+            font-size: 0.8rem;
+        }
+
+        .rooms-table th,
+        .rooms-table td {
+            padding: 1rem 0.5rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideInDown {
+        from { opacity: 0; transform: translateY(-30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #666;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        color: #ccc;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: #333;
+    }
+
+    .empty-state p {
+        font-size: 1rem;
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hostel-container">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-bed"></i> Hostel Management
+            </h1>
+            <p class="page-subtitle">Live hostel occupancy tracking and room allocation</p>
+        </div>
+
+        <!-- Hostel Overview Stats -->
+        <div class="hostel-stats">
+            <div class="stat-card animate-fadeInUp">
+                <div class="stat-icon">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div class="stat-number">{{ rooms|length }}</div>
+                <div class="stat-label">Total Rooms</div>
+            </div>
+
+            <div class="stat-card animate-fadeInUp">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-number">{{ rooms|sum(attribute='occupied') }}</div>
+                <div class="stat-label">Occupied</div>
+            </div>
+
+            <div class="stat-card animate-fadeInUp">
+                <div class="stat-icon">
+                    <i class="fas fa-bed"></i>
+                </div>
+                <div class="stat-number">{{ rooms|selectattr('occupied', 'lt', rooms[0].capacity if rooms else 0)|list|length }}</div>
+                <div class="stat-label">Available</div>
+            </div>
+
+            <div class="stat-card animate-fadeInUp">
+                <div class="stat-icon">
+                    <i class="fas fa-percentage"></i>
+                </div>
+                <div class="stat-number">{{ "%.1f"|format((rooms|sum(attribute='occupied') / (rooms|sum(attribute='capacity') or 1) * 100)) }}%</div>
+                <div class="stat-label">Occupancy Rate</div>
+            </div>
+        </div>
+
+        <!-- Hostel Floor Plans -->
+        <div class="floor-plans">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-map"></i> Live Floor Plans
+                </h2>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <div style="width: 12px; height: 12px; background: #56ab2f; border-radius: 2px;"></div>
+                        <span style="font-size: 0.8rem; color: #666;">Available</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <div style="width: 12px; height: 12px; background: #ff416c; border-radius: 2px;"></div>
+                        <span style="font-size: 0.8rem; color: #666;">Occupied</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <div style="width: 12px; height: 12px; background: #ffc107; border-radius: 2px;"></div>
+                        <span style="font-size: 0.8rem; color: #666;">Maintenance</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="floor-tabs">
+                <div class="floor-tab active" onclick="showFloor(1)">Floor 1</div>
+                <div class="floor-tab" onclick="showFloor(2)">Floor 2</div>
+                <div class="floor-tab" onclick="showFloor(3)">Floor 3</div>
+            </div>
+
+            {% for floor in range(1, 4) %}
+            <div class="floor-plan" id="floor{{ floor }}">
+                <div class="rooms-grid">
+                    {% for room in rooms %}
+                        {% if room.floor == floor %}
+                        <div class="room {{ room.status }}" onclick="showRoomDetails('{{ room.room_number }}')">
+                            <div class="room-number">{{ room.room_number }}</div>
+                            <div class="room-status room-{{ room.status }}">
+                                {{ room.status.title() }}
+                            </div>
+                            <div class="room-capacity">{{ room.occupied }}/{{ room.capacity }}</div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Hostel Management -->
+        <div class="hostel-management">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-cogs"></i> Hostel Management
+                </h2>
+                <a href="{{ url_for('allocate_hostel') }}" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i> Allocate Room
+                </a>
+            </div>
+
+            <div class="management-tabs">
+                <button class="management-tab active" onclick="showManagementTab('rooms')">All Rooms</button>
+                <button class="management-tab" onclick="showManagementTab('allocations')">Recent Allocations</button>
+                <button class="management-tab" onclick="showManagementTab('maintenance')">Maintenance</button>
+            </div>
+
+            <!-- All Rooms Tab -->
+            <div class="management-content active" id="roomsTab">
+                {% if rooms %}
+                <div class="rooms-table-container">
+                    <table class="rooms-table">
+                        <thead>
+                            <tr>
+                                <th>Room Number</th>
+                                <th>Floor</th>
+                                <th>Capacity</th>
+                                <th>Occupancy</th>
+                                <th>Status</th>
+                                <th>Occupants</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for room in rooms %}
+                            <tr>
+                                <td>
+                                    <div style="font-weight: 600; color: #333;">{{ room.room_number }}</div>
+                                </td>
+                                <td>
+                                    <span style="background: rgba(102, 126, 234, 0.1); color: #667eea; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500;">
+                                        Floor {{ room.floor }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span style="font-weight: 600; color: #333;">{{ room.capacity }} Beds</span>
+                                </td>
+                                <td>
+                                    <div class="occupancy-indicator">
+                                        <span class="occupancy-text">{{ room.occupied }}/{{ room.capacity }}</span>
+                                        <div class="occupancy-bar">
+                                            <div class="occupancy-fill" style="width: {{ (room.occupied / room.capacity * 100) if room.capacity > 0 else 0 }}%;"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="status-badge status-{{ room.status }}">
+                                        {{ room.status.title() }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if room.student_ids %}
+                                        {% set student_list = room.student_ids|from_json %}
+                                        {% for student_id in student_list %}
+                                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                                            <div style="width: 25px; height: 25px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.7rem; font-weight: 600;">
+                                                {{ student_id[-2:] }}
+                                            </div>
+                                            <span style="font-size: 0.8rem; font-weight: 500;">{{ student_id }}</span>
+                                        </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span style="color: #666; font-style: italic;">No occupants</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn-sm btn-view" onclick="showRoomDetails('{{ room.room_number }}')" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        {% if room.occupied < room.capacity %}
+                                        <button class="btn-sm btn-allocate" onclick="allocateRoom('{{ room.room_number }}')" title="Allocate Room">
+                                            <i class="fas fa-user-plus"></i>
+                                        </button>
+                                        {% endif %}
+                                        <button class="btn-sm btn-maintenance" onclick="setMaintenance('{{ room.room_number }}')" title="Set Maintenance">
+                                            <i class="fas fa-tools"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-bed"></i>
+                    <h3>No Rooms Found</h3>
+                    <p>Hostel rooms will be displayed here once they are configured.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Recent Allocations Tab -->
+            <div class="management-content" id="allocationsTab">
+                <div class="empty-state">
+                    <i class="fas fa-user-plus"></i>
+                    <h3>Recent Allocations</h3>
+                    <p>Recent room allocations will be displayed here.</p>
+                </div>
+            </div>
+
+            <!-- Maintenance Tab -->
+            <div class="management-content" id="maintenanceTab">
+                <div class="empty-state">
+                    <i class="fas fa-tools"></i>
+                    <h3>Maintenance Requests</h3>
+                    <p>Maintenance requests and schedules will be displayed here.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Room Details Modal -->
+<div id="roomModal" class="room-modal">
+    <div class="room-modal-content">
+        <div class="room-modal-header">
+            <h3 class="room-modal-title">Room Details</h3>
+            <span class="close-room-modal" onclick="closeRoomModal()">&times;</span>
+        </div>
+        <div id="roomModalContent"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Floor navigation
+    function showFloor(floorNumber) {
+        // Hide all floor plans
+        document.querySelectorAll('.floor-plan').forEach(plan => {
+            plan.classList.remove('active');
+        });
+
+        // Remove active class from all tabs
+        document.querySelectorAll('.floor-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+
+        // Show selected floor
+        document.getElementById(`floor${floorNumber}`).classList.add('active');
+        
+        // Add active class to clicked tab
+        event.target.classList.add('active');
+    }
+
+    // Management tabs
+    function showManagementTab(tabName) {
+        // Hide all management content
+        document.querySelectorAll('.management-content').forEach(content => {
+            content.classList.remove('active');
+        });
+
+        // Remove active class from all tabs
+        document.querySelectorAll('.management-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+
+        // Show selected tab content
+        document.getElementById(`${tabName}Tab`).classList.add('active');
+        
+        // Add active class to clicked tab
+        event.target.classList.add('active');
+    }
+
+    // Room details modal
+    function showRoomDetails(roomNumber) {
+        // Find room data
+        const roomData = {
+            '101': {
+                room_number: '101',
+                floor: 1,
+                capacity: 2,
+                occupied: 2,
+                status: 'occupied',
+                occupants: ['STU202412011', 'STU202412012']
+            },
+            '102': {
+                room_number: '102',
+                floor: 1,
+                capacity: 2,
+                occupied: 1,
+                status: 'available',
+                occupants: ['STU202412013']
+            },
+            '201': {
+                room_number: '201',
+                floor: 2,
+                capacity: 2,
+                occupied: 0,
+                status: 'available',
+                occupants: []
+            }
+        };
+
+        const room = roomData[roomNumber] || {
+            room_number: roomNumber,
+            floor: Math.floor(parseInt(roomNumber) / 100),
+            capacity: 2,
+            occupied: Math.floor(Math.random() * 3),
+            status: ['available', 'occupied', 'maintenance'][Math.floor(Math.random() * 3)],
+            occupants: []
+        };
+
+        const modalContent = `
+            <div class="room-details">
+                <div class="room-detail-item">
+                    <div class="room-detail-label">Room Number</div>
+                    <div class="room-detail-value">${room.room_number}</div>
+                </div>
+                <div class="room-detail-item">
+                    <div class="room-detail-label">Floor</div>
+                    <div class="room-detail-value">Floor ${room.floor}</div>
+                </div>
+                <div class="room-detail-item">
+                    <div class="room-detail-label">Capacity</div>
+                    <div class="room-detail-value">${room.capacity} Beds</div>
+                </div>
+                <div class="room-detail-item">
+                    <div class="room-detail-label">Occupancy</div>
+                    <div class="room-detail-value">${room.occupied}/${room.capacity}</div>
+                </div>
+                <div class="room-detail-item">
+                    <div class="room-detail-label">Status</div>
+                    <div class="room-detail-value">
+                        <span class="status-badge status-${room.status}">${room.status.charAt(0).toUpperCase() + room.status.slice(1)}</span>
+                    </div>
+                </div>
+                <div class="room-detail-item">
+                    <div class="room-detail-label">Availability</div>
+                    <div class="room-detail-value">${room.capacity - room.occupied} beds available</div>
+                </div>
+            </div>
+
+            ${room.occupants.length > 0 ? `
+            <div class="room-occupants">
+                <h4 style="margin-bottom: 1rem; color: #333; font-weight: 700;">Current Occupants</h4>
+                ${room.occupants.map(occupant => `
+                    <div class="occupant-item">
+                        <div class="occupant-avatar">${occupant.slice(-2)}</div>
+                        <div class="occupant-info">
+                            <div class="occupant-name">Student ${occupant}</div>
+                            <div class="occupant-id">ID: ${occupant}</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            ` : `
+            <div style="text-align: center; padding: 2rem; color: #666;">
+                <i class="fas fa-user-slash" style="font-size: 3rem; margin-bottom: 1rem; color: #ccc;"></i>
+                <h4>No Occupants</h4>
+                <p>This room is currently vacant and available for allocation.</p>
+            </div>
+            `}
+
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="btn btn-primary" onclick="allocateRoom('${room.room_number}')" style="margin-right: 1rem;">
+                    <i class="fas fa-user-plus"></i> Allocate Room
+                </button>
+                <button class="btn btn-secondary" onclick="closeRoomModal()">
+                    <i class="fas fa-times"></i> Close
+                </button>
+            </div>
+        `;
+
+        document.getElementById('roomModalContent').innerHTML = modalContent;
+        document.getElementById('roomModal').style.display = 'block';
+    }
+
+    // Close room modal
+    function closeRoomModal() {
+        document.getElementById('roomModal').style.display = 'none';
+    }
+
+    // Allocate room
+    function allocateRoom(roomNumber) {
+        closeRoomModal();
+        // In a real application, this would redirect to the allocation form
+        alert(`Room allocation functionality for room ${roomNumber} would be implemented here.`);
+    }
+
+    // Set maintenance
+    function setMaintenance(roomNumber) {
+        if (confirm(`Set room ${roomNumber} under maintenance?`)) {
+            // In a real application, this would make an API call
+            alert(`Maintenance mode set for room ${roomNumber}.`);
+        }
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('roomModal');
+        if (event.target === modal) {
+            closeRoomModal();
+        }
+    }
+
+    // Add animations to elements
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate stat cards
+        const statCards = document.querySelectorAll('.stat-card');
+        statCards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+            card.classList.add('animate-fadeInUp');
+        });
+
+        // Add hover effects to rooms
+        document.querySelectorAll('.room').forEach(room => {
+            room.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px) scale(1.05)';
+            });
+            
+            room.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Add hover effects to table rows
+        document.querySelectorAll('.rooms-table tr').forEach(row => {
+            row.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+                this.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
+            });
+            
+            row.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = 'none';
+            });
+        });
+    });
+
+    // Real-time updates simulation
+    function simulateLiveUpdates() {
+        setInterval(() => {
+            // Update occupancy stats randomly
+            const statNumbers = document.querySelectorAll('.stat-number');
+            statNumbers.forEach((stat, index) => {
+                if (index === 1 || index === 2) { // Occupied and Available stats
+                    const current = parseInt(stat.textContent);
+                    const change = Math.floor(Math.random() * 2) - 1; // -1, 0, or 1
+                    const newValue = Math.max(0, current + change);
+                    
+                    if (change !== 0) {
+                        stat.textContent = newValue;
+                        
+                        // Add pulse effect
+                        stat.style.animation = 'none';
+                        setTimeout(() => {
+                            stat.style.animation = 'pulse 0.5s ease-out';
+                        }, 10);
+                    }
+                }
+            });
+
+            // Update room statuses randomly
+            const rooms = document.querySelectorAll('.room');
+            rooms.forEach(room => {
+                if (Math.random() < 0.1) { // 10% chance to change status
+                    const statuses = ['available', 'occupied', 'maintenance'];
+                    const currentStatus = room.classList.contains('available') ? 'available' : 
+                                        room.classList.contains('occupied') ? 'occupied' : 'maintenance';
+                    const newStatus = statuses[Math.floor(Math.random() * statuses.length)];
+                    
+                    if (newStatus !== currentStatus) {
+                        room.className = `room ${newStatus}`;
+                        room.querySelector('.room-status').textContent = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+                        room.querySelector('.room-status').className = `room-status room-${newStatus}`;
+                        
+                        // Add animation
+                        room.style.animation = 'pulse 0.5s ease-out';
+                    }
+                }
+            });
+        }, 10000); // Update every 10 seconds
+    }
+
+    // Start live updates
+    document.addEventListener('DOMContentLoaded', function() {
+        simulateLiveUpdates();
+    });
+</script>
+{% endblock %}

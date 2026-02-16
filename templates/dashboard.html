@@ -1,0 +1,784 @@
+{% extends "base_admin_sidebar.html" %}
+
+{% block title %}Admin Dashboard - College ERP{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-container {
+        padding: 2rem 0;
+        min-height: calc(100vh - 160px);
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .welcome-section {
+        text-align: center;
+        margin-bottom: 3rem;
+        animation: fadeInDown 1s ease-out;
+    }
+
+    .welcome-title {
+        font-size: 3rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+    }
+
+    .welcome-subtitle {
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 400;
+    }
+
+    /* Gamified Stats Cards */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2.5rem;
+        text-align: center;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0.1s; }
+    .stat-card:nth-child(2) { animation-delay: 0.2s; }
+    .stat-card:nth-child(3) { animation-delay: 0.3s; }
+    .stat-card:nth-child(4) { animation-delay: 0.4s; }
+    .stat-card:nth-child(5) { animation-delay: 0.5s; }
+    .stat-card:nth-child(6) { animation-delay: 0.6s; }
+
+    .stat-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: pulse 2s infinite;
+    }
+
+    .stat-number {
+        font-size: 3rem;
+        font-weight: 800;
+        color: #333;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: countUp 2s ease-out;
+    }
+
+    .stat-label {
+        color: #666;
+        font-weight: 600;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .stat-change {
+        margin-top: 1rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        display: inline-block;
+    }
+
+    .stat-change.positive {
+        background: rgba(86, 171, 47, 0.1);
+        color: #56ab2f;
+    }
+
+    .stat-change.negative {
+        background: rgba(255, 65, 108, 0.1);
+        color: #ff416c;
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2.5rem;
+        margin-bottom: 3rem;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideInLeft 0.8s ease-out;
+    }
+
+    .quick-actions h3 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .action-btn {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 16px;
+        text-decoration: none;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .action-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .action-btn:hover::before {
+        left: 100%;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(102, 126, 234, 0.3);
+    }
+
+    .action-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .action-text {
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    /* Recent Activity */
+    .activity-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .activity-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideInUp 0.8s ease-out;
+    }
+
+    .activity-card h4 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .activity-item:hover {
+        background: rgba(102, 126, 234, 0.05);
+        border-radius: 8px;
+        padding-left: 1rem;
+        margin: 0 -1rem;
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+
+    .activity-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+
+    .activity-content {
+        flex: 1;
+    }
+
+    .activity-title {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.25rem;
+    }
+
+    .activity-time {
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    /* Progress Bars */
+    .progress-section {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2.5rem;
+        margin-bottom: 3rem;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideInRight 0.8s ease-out;
+    }
+
+    .progress-item {
+        margin-bottom: 2rem;
+    }
+
+    .progress-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .progress-label {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .progress-percentage {
+        font-weight: 700;
+        color: #667eea;
+    }
+
+    .progress-bar-container {
+        width: 100%;
+        height: 12px;
+        background: rgba(102, 126, 234, 0.1);
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 6px;
+        transition: width 2s ease-out;
+        position: relative;
+    }
+
+    .progress-bar::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        animation: shimmer 2s infinite;
+    }
+
+    /* Animations */
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.1);
+        }
+    }
+
+    @keyframes countUp {
+        from {
+            opacity: 0;
+            transform: scale(0.5);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @keyframes shimmer {
+        0% {
+            transform: translateX(-100%);
+        }
+        100% {
+            transform: translateX(100%);
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .welcome-title {
+            font-size: 2rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .activity-section {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .actions-grid {
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        }
+
+        .stat-card {
+            padding: 1.5rem;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+        }
+
+        .stat-icon {
+            font-size: 3rem;
+        }
+    }
+
+    /* Live Updates Indicator */
+    .live-indicator {
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        background: rgba(86, 171, 47, 0.9);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        z-index: 1000;
+        animation: pulse 2s infinite;
+    }
+
+    .live-indicator i {
+        margin-right: 0.5rem;
+        animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+        0%, 50% { opacity: 1; }
+        51%, 100% { opacity: 0.3; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="container">
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <h1 class="welcome-title">
+                <i class="fas fa-tachometer-alt"></i> Welcome, {{ session.username }}!
+            </h1>
+            <p class="welcome-subtitle">Here's your comprehensive campus overview</p>
+        </div>
+
+        <!-- Live Updates Indicator -->
+        <div class="live-indicator">
+            <i class="fas fa-circle"></i> Live Updates
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card animate-fadeInUp">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-number" data-count="{{ total_students }}">{{ total_students }}</div>
+                <div class="stat-label">Total Students</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> +12% this month
+                </div>
+            </div>
+
+            <div class="stat-card animate-fadeInUp">
+                <div class="stat-icon">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div class="stat-number" data-count="{{ active_students }}">{{ active_students }}</div>
+                <div class="stat-label">Active Students</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> +8% this week
+                </div>
+            </div>
+
+            <div class="stat-card animate-fadeInUp">
+                <div class="stat-icon">
+                    <i class="fas fa-rupee-sign"></i>
+                </div>
+                <div class="stat-number" data-count="{{ total_revenue }}">₹{{ "{:,.0f}".format(total_revenue) }}</div>
+                <div class="stat-label">Total Revenue</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> +15% this quarter
+                </div>
+            </div>
+
+            <div class="stat-card animate-fadeInUp">
+                <div class="stat-icon">
+                    <i class="fas fa-bed"></i>
+                </div>
+                <div class="stat-number" data-count="{{ occupancy_rate|int }}">{{ "%.1f"|format(occupancy_rate) }}%</div>
+                <div class="stat-label">Hostel Occupancy</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> +3% this month
+                </div>
+            </div>
+
+            <div class="stat-card animate-fadeInUp">
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-number" data-count="{{ high_risk_students }}">{{ high_risk_students }}</div>
+                <div class="stat-label">At-Risk Students</div>
+                <div class="stat-change negative">
+                    <i class="fas fa-arrow-down"></i> -5% this week
+                </div>
+            </div>
+
+            <div class="stat-card animate-fadeInUp">
+                <div class="stat-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-number" data-count="98">98%</div>
+                <div class="stat-label">System Health</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-check-circle"></i> Optimal
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+            <div class="actions-grid">
+                <a href="{{ url_for('new_admission') }}" class="action-btn">
+                    <span class="action-icon"><i class="fas fa-user-plus"></i></span>
+                    <span class="action-text">New Admission</span>
+                </a>
+                <a href="{{ url_for('pay_fee') }}" class="action-btn">
+                    <span class="action-icon"><i class="fas fa-credit-card"></i></span>
+                    <span class="action-text">Collect Fees</span>
+                </a>
+                <a href="{{ url_for('allocate_hostel') }}" class="action-btn">
+                    <span class="action-icon"><i class="fas fa-bed"></i></span>
+                    <span class="action-text">Hostel Allocation</span>
+                </a>
+                <a href="{{ url_for('timetable') }}" class="action-btn">
+                    <span class="action-icon"><i class="fas fa-calendar-alt"></i></span>
+                    <span class="action-text">Generate Timetable</span>
+                </a>
+                <a href="{{ url_for('analytics') }}" class="action-btn">
+                    <span class="action-icon"><i class="fas fa-chart-bar"></i></span>
+                    <span class="action-text">View Analytics</span>
+                </a>
+                <a href="{{ url_for('chatbot') }}" class="action-btn">
+                    <span class="action-icon"><i class="fas fa-robot"></i></span>
+                    <span class="action-text">AI Assistant</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Activity Section -->
+        <div class="activity-section">
+            <div class="activity-card">
+                <h4><i class="fas fa-credit-card"></i> Recent Fee Payments</h4>
+                {% for fee in recent_fees %}
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-rupee-sign"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">{{ fee.student_id }} - ₹{{ "{:,.0f}".format(fee.amount) }}</div>
+                        <div class="activity-time">{{ fee.payment_date.strftime('%B %d, %Y at %I:%M %p') }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="activity-card">
+                <h4><i class="fas fa-user-plus"></i> Recent Admissions</h4>
+                {% for student in recent_admissions %}
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">{{ student.name }} - {{ student.course }}</div>
+                        <div class="activity-time">{{ student.admission_date.strftime('%B %d, %Y') }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-section">
+            <h3 style="text-align: center; margin-bottom: 2rem; font-size: 1.8rem; font-weight: 700; color: #333;">
+                <i class="fas fa-chart-pie"></i> Campus Performance Metrics
+            </h3>
+            
+            <div class="progress-item">
+                <div class="progress-header">
+                    <span class="progress-label">Student Satisfaction</span>
+                    <span class="progress-percentage">94%</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: 94%;"></div>
+                </div>
+            </div>
+
+            <div class="progress-item">
+                <div class="progress-header">
+                    <span class="progress-label">Academic Performance</span>
+                    <span class="progress-percentage">87%</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: 87%;"></div>
+                </div>
+            </div>
+
+            <div class="progress-item">
+                <div class="progress-header">
+                    <span class="progress-label">Fee Collection Rate</span>
+                    <span class="progress-percentage">96%</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: 96%;"></div>
+                </div>
+            </div>
+
+            <div class="progress-item">
+                <div class="progress-header">
+                    <span class="progress-label">Infrastructure Utilization</span>
+                    <span class="progress-percentage">82%</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: 82%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Counter animation
+    function animateCounters() {
+        const counters = document.querySelectorAll('.stat-number[data-count]');
+        
+        counters.forEach(counter => {
+            const target = parseInt(counter.getAttribute('data-count'));
+            const duration = 2000; // 2 seconds
+            const increment = target / (duration / 16); // 60fps
+            let current = 0;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    counter.textContent = target;
+                    clearInterval(timer);
+                } else {
+                    counter.textContent = Math.floor(current);
+                }
+            }, 16);
+        });
+    }
+
+    // Progress bar animation
+    function animateProgressBars() {
+        const progressBars = document.querySelectorAll('.progress-bar');
+        
+        progressBars.forEach(bar => {
+            const width = bar.style.width;
+            bar.style.width = '0%';
+            
+            setTimeout(() => {
+                bar.style.width = width;
+            }, 500);
+        });
+    }
+
+    // Real-time updates simulation
+    function simulateLiveUpdates() {
+        setInterval(() => {
+            // Update some random stats
+            const stats = document.querySelectorAll('.stat-number[data-count]');
+            stats.forEach(stat => {
+                const current = parseInt(stat.textContent.replace(/[^\d]/g, ''));
+                const change = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
+                const newValue = Math.max(0, current + change);
+                
+                if (change !== 0) {
+                    stat.textContent = stat.textContent.replace(/\d+/, newValue);
+                    
+                    // Add pulse effect
+                    stat.style.animation = 'none';
+                    setTimeout(() => {
+                        stat.style.animation = 'pulse 0.5s ease-out';
+                    }, 10);
+                }
+            });
+        }, 10000); // Update every 10 seconds
+    }
+
+    // Initialize animations
+    document.addEventListener('DOMContentLoaded', function() {
+        // Stagger the animation of stat cards
+        const statCards = document.querySelectorAll('.stat-card');
+        statCards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+        });
+        
+        // Start animations
+        setTimeout(animateCounters, 500);
+        setTimeout(animateProgressBars, 1000);
+        
+        // Start live updates
+        simulateLiveUpdates();
+        
+        // Add hover effects to activity items
+        const activityItems = document.querySelectorAll('.activity-item');
+        activityItems.forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(10px)';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0)';
+            });
+        });
+    });
+
+    // Add click effects to stat cards
+    document.querySelectorAll('.stat-card').forEach(card => {
+        card.addEventListener('click', function() {
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = 'translateY(-10px) scale(1.02)';
+            }, 150);
+        });
+    });
+
+    // Add loading states and transitions
+    window.addEventListener('beforeunload', function() {
+        document.body.style.opacity = '0.5';
+        document.body.style.transition = 'opacity 0.3s ease';
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Organization - College ERP</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 2rem 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .organizations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .organization-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .organization-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .organization-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+            border-color: rgba(86, 171, 47, 0.3);
+        }
+
+        .organization-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .organization-card.selected {
+            border-color: #56ab2f;
+            background: rgba(86, 171, 47, 0.1);
+            transform: scale(1.02);
+        }
+
+        .org-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .org-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .org-info h3 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+
+        .org-info p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .org-details {
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            opacity: 0.9;
+        }
+
+        .detail-value {
+            color: #a8e6cf;
+            font-weight: 500;
+        }
+
+        .org-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 10px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #56ab2f;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .select-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+            color: white;
+            padding: 1rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .select-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(86, 171, 47, 0.3);
+        }
+
+        .selected-indicator {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: #56ab2f;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s ease;
+        }
+
+        .organization-card.selected .selected-indicator {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .continue-section {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .continue-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 1.2rem 3rem;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .continue-btn.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .continue-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .selected-org-info {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: rgba(86, 171, 47, 0.1);
+            border-radius: 10px;
+            border: 1px solid #56ab2f;
+        }
+
+        .selected-org-info h4 {
+            color: #56ab2f;
+            margin-bottom: 0.5rem;
+        }
+
+        .selected-org-info p {
+            opacity: 0.9;
+        }
+
+        /* Animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .fade-in:nth-child(1) { animation-delay: 0.1s; }
+        .fade-in:nth-child(2) { animation-delay: 0.2s; }
+        .fade-in:nth-child(3) { animation-delay: 0.3s; }
+        .fade-in:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .organizations-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .org-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .back-btn {
+                position: relative;
+                top: auto;
+                left: auto;
+                margin-bottom: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/login" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Login
+    </a>
+
+    <div class="container">
+        <div class="header fade-in">
+            <h1>Select Your Organization</h1>
+            <p>Choose the institute where you want to apply for admission</p>
+        </div>
+
+        <div class="organizations-grid">
+            {% for org in organizations %}
+            <div class="organization-card fade-in" data-org="{{ org.code }}">
+                <div class="selected-indicator">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="org-header">
+                    <div class="org-logo">{{ org.code[:2] }}</div>
+                    <div class="org-info">
+                        <h3>{{ org.name }}</h3>
+                        <p>{{ org.description }}</p>
+                    </div>
+                </div>
+                <div class="org-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Location</span>
+                        <span class="detail-value">{{ org.location }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Established</span>
+                        <span class="detail-value">{{ org.established_year }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Type</span>
+                        <span class="detail-value">{{ org.type }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Specialization</span>
+                        <span class="detail-value">{{ org.specialization }}</span>
+                    </div>
+                </div>
+                <div class="org-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">{{ org.student_count }}+</div>
+                        <div class="stat-label">Students</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{ org.placement_rate }}%</div>
+                        <div class="stat-label">Placement</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">₹{{ org.avg_package }}L</div>
+                        <div class="stat-label">Avg Package</div>
+                    </div>
+                </div>
+                <button class="select-btn" onclick="selectOrganization('{{ org.code }}', '{{ org.name }}')">
+                    <i class="fas fa-check-circle"></i>
+                    Select This Institute
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="continue-section fade-in">
+            <div id="selectedOrgInfo" class="selected-org-info" style="display: none;">
+                <h4>Selected Organization</h4>
+                <p id="selectedOrgName"></p>
+            </div>
+            <button class="continue-btn" id="continueBtn" onclick="continueToApplication()">
+                <i class="fas fa-arrow-right"></i>
+                Continue to Application
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let selectedOrganization = null;
+
+        function selectOrganization(orgCode, orgName) {
+            // Remove previous selection
+            document.querySelectorAll('.organization-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            // Add selection to clicked card
+            const selectedCard = document.querySelector(`[data-org="${orgCode}"]`);
+            selectedCard.classList.add('selected');
+
+            // Update selected organization info
+            selectedOrganization = { code: orgCode, name: orgName };
+            document.getElementById('selectedOrgName').textContent = orgName;
+            document.getElementById('selectedOrgInfo').style.display = 'block';
+
+            // Enable continue button
+            const continueBtn = document.getElementById('continueBtn');
+            continueBtn.classList.add('active');
+
+            // Add selection animation
+            selectedCard.style.animation = 'pulse 0.5s ease';
+            setTimeout(() => {
+                selectedCard.style.animation = '';
+            }, 500);
+
+            // Show notification
+            showNotification(`Selected: ${orgName}`, 'success');
+        }
+
+        function continueToApplication() {
+            if (!selectedOrganization) {
+                alert('Please select an organization first');
+                return;
+            }
+
+            // Store selected organization in sessionStorage
+            sessionStorage.setItem('selectedOrganization', JSON.stringify(selectedOrganization));
+            
+            // Redirect to application form
+            window.location.href = '/student/apply';
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+                ${message}
+            `;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+                color: white;
+                padding: 1rem 2rem;
+                border-radius: 10px;
+                font-weight: bold;
+                z-index: 1000;
+                animation: slideIn 0.5s ease;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.5s ease';
+                setTimeout(() => notification.remove(), 500);
+            }, 3000);
+        }
+
+        // Add CSS for animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0%, 100% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.05);
+                }
+            }
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Add hover effects
+        document.querySelectorAll('.organization-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                if (!this.classList.contains('selected')) {
+                    this.style.transform = 'translateY(-10px) scale(1.02)';
+                }
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                if (!this.classList.contains('selected')) {
+                    this.style.transform = 'translateY(0) scale(1)';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

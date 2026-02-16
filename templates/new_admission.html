@@ -1,0 +1,865 @@
+{% extends "base.html" %}
+
+{% block title %}New Admission - College ERP System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admission-container {
+        padding: 2rem 0;
+        min-height: calc(100vh - 80px);
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        animation: fadeInDown 1s ease-out;
+    }
+
+    .page-title {
+        font-size: 3rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+    }
+
+    .page-subtitle {
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 400;
+    }
+
+    /* Form Container */
+    .form-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideInUp 0.8s ease-out;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    /* Form Sections */
+    .form-section {
+        margin-bottom: 3rem;
+        padding-bottom: 2rem;
+        border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-title i {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Form Grid */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #333;
+        font-size: 0.9rem;
+    }
+
+    .form-label.required::after {
+        content: ' *';
+        color: #ff416c;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid #e1e5e9;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.8);
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        background: white;
+    }
+
+    .form-control:invalid {
+        border-color: #ff416c;
+    }
+
+    .form-control:valid {
+        border-color: #56ab2f;
+    }
+
+    /* Input Groups */
+    .input-group {
+        position: relative;
+    }
+
+    .input-group i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #667eea;
+        z-index: 1;
+    }
+
+    .input-group .form-control {
+        padding-left: 3rem;
+    }
+
+    /* Form Buttons */
+    .form-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 150px;
+        justify-content: center;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-secondary {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        border: 2px solid #667eea;
+    }
+
+    .btn-secondary:hover {
+        background: #667eea;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    /* Progress Indicator */
+    .progress-indicator {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 3rem;
+        animation: fadeInDown 0.8s ease-out;
+    }
+
+    .progress-step {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .step {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(102, 126, 234, 0.1);
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        color: #667eea;
+        transition: all 0.3s ease;
+    }
+
+    .step.active {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .step.completed {
+        background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+        color: white;
+    }
+
+    .step-label {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #666;
+        margin-top: 0.5rem;
+    }
+
+    .step-connector {
+        width: 60px;
+        height: 2px;
+        background: rgba(102, 126, 234, 0.2);
+        margin: 0 1rem;
+    }
+
+    /* Validation Messages */
+    .validation-message {
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .validation-error {
+        color: #ff416c;
+    }
+
+    .validation-success {
+        color: #56ab2f;
+    }
+
+    /* File Upload */
+    .file-upload {
+        border: 2px dashed rgba(102, 126, 234, 0.3);
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .file-upload:hover {
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    .file-upload.dragover {
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.1);
+    }
+
+    .file-upload i {
+        font-size: 3rem;
+        color: #667eea;
+        margin-bottom: 1rem;
+    }
+
+    .file-upload-text {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+
+    .file-upload-subtext {
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .form-container {
+            margin: 1rem;
+            padding: 2rem;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .form-buttons {
+            flex-direction: column;
+        }
+
+        .progress-step {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .step-connector {
+            width: 2px;
+            height: 30px;
+            margin: 0.5rem 0;
+        }
+    }
+
+    /* Loading States */
+    .loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Success Animation */
+    .success-animation {
+        text-align: center;
+        padding: 2rem;
+        animation: bounceIn 0.8s ease-out;
+    }
+
+    .success-animation i {
+        font-size: 4rem;
+        color: #56ab2f;
+        margin-bottom: 1rem;
+        animation: pulse 1s infinite;
+    }
+
+    @keyframes bounceIn {
+        0% {
+            opacity: 0;
+            transform: scale(0.3);
+        }
+        50% {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+        70% {
+            transform: scale(0.9);
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admission-container">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-user-plus"></i> New Student Admission
+            </h1>
+            <p class="page-subtitle">Add a new student to the college management system</p>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div class="progress-indicator">
+            <div class="progress-step">
+                <div class="step active" id="step1">1</div>
+                <div class="step-label">Personal Info</div>
+            </div>
+            <div class="step-connector"></div>
+            <div class="progress-step">
+                <div class="step" id="step2">2</div>
+                <div class="step-label">Academic Info</div>
+            </div>
+            <div class="step-connector"></div>
+            <div class="progress-step">
+                <div class="step" id="step3">3</div>
+                <div class="step-label">Documents</div>
+            </div>
+            <div class="step-connector"></div>
+            <div class="progress-step">
+                <div class="step" id="step4">4</div>
+                <div class="step-label">Review</div>
+            </div>
+        </div>
+
+        <!-- Form Container -->
+        <div class="form-container">
+            <form method="POST" action="{{ url_for('new_admission') }}" id="admissionForm" enctype="multipart/form-data">
+                <!-- Personal Information Section -->
+                <div class="form-section" id="section1">
+                    <h3 class="section-title">
+                        <i class="fas fa-user"></i> Personal Information
+                    </h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label required">Full Name</label>
+                            <div class="input-group">
+                                <i class="fas fa-user"></i>
+                                <input type="text" name="name" class="form-control" placeholder="Enter full name" required>
+                            </div>
+                            <div class="validation-message" id="nameValidation"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label required">Email Address</label>
+                            <div class="input-group">
+                                <i class="fas fa-envelope"></i>
+                                <input type="email" name="email" class="form-control" placeholder="Enter email address" required>
+                            </div>
+                            <div class="validation-message" id="emailValidation"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label required">Phone Number</label>
+                            <div class="input-group">
+                                <i class="fas fa-phone"></i>
+                                <input type="tel" name="phone" class="form-control" placeholder="Enter phone number" required>
+                            </div>
+                            <div class="validation-message" id="phoneValidation"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label required">Date of Birth</label>
+                            <div class="input-group">
+                                <i class="fas fa-calendar"></i>
+                                <input type="date" name="dob" class="form-control" required>
+                            </div>
+                            <div class="validation-message" id="dobValidation"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label required">Gender</label>
+                            <div class="input-group">
+                                <i class="fas fa-venus-mars"></i>
+                                <select name="gender" class="form-control" required>
+                                    <option value="">Select Gender</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="validation-message" id="genderValidation"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label required">Address</label>
+                            <div class="input-group">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <textarea name="address" class="form-control" placeholder="Enter complete address" rows="3" required></textarea>
+                            </div>
+                            <div class="validation-message" id="addressValidation"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Academic Information Section -->
+                <div class="form-section" id="section2">
+                    <h3 class="section-title">
+                        <i class="fas fa-graduation-cap"></i> Academic Information
+                    </h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label required">Course</label>
+                            <div class="input-group">
+                                <i class="fas fa-book"></i>
+                                <select name="course" class="form-control" required>
+                                    <option value="">Select Course</option>
+                                    <option value="Computer Science">Computer Science Engineering</option>
+                                    <option value="Electronics">Electronics & Communication</option>
+                                    <option value="Mechanical">Mechanical Engineering</option>
+                                    <option value="Civil">Civil Engineering</option>
+                                    <option value="Electrical">Electrical Engineering</option>
+                                    <option value="Information Technology">Information Technology</option>
+                                </select>
+                            </div>
+                            <div class="validation-message" id="courseValidation"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label required">Year of Study</label>
+                            <div class="input-group">
+                                <i class="fas fa-calendar-alt"></i>
+                                <select name="year" class="form-control" required>
+                                    <option value="">Select Year</option>
+                                    <option value="1">First Year</option>
+                                    <option value="2">Second Year</option>
+                                    <option value="3">Third Year</option>
+                                    <option value="4">Fourth Year</option>
+                                </select>
+                            </div>
+                            <div class="validation-message" id="yearValidation"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label required">Previous Qualification</label>
+                            <div class="input-group">
+                                <i class="fas fa-certificate"></i>
+                                <select name="qualification" class="form-control" required>
+                                    <option value="">Select Qualification</option>
+                                    <option value="12th">12th Standard</option>
+                                    <option value="Diploma">Diploma</option>
+                                    <option value="Bachelor">Bachelor's Degree</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="validation-message" id="qualificationValidation"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Previous Marks/Percentage</label>
+                            <div class="input-group">
+                                <i class="fas fa-percentage"></i>
+                                <input type="number" name="previous_marks" class="form-control" placeholder="Enter marks or percentage" min="0" max="100">
+                            </div>
+                            <div class="validation-message" id="marksValidation"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Guardian Name</label>
+                            <div class="input-group">
+                                <i class="fas fa-user-friends"></i>
+                                <input type="text" name="guardian_name" class="form-control" placeholder="Enter guardian's name">
+                            </div>
+                            <div class="validation-message" id="guardianValidation"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Guardian Phone</label>
+                            <div class="input-group">
+                                <i class="fas fa-phone-alt"></i>
+                                <input type="tel" name="guardian_phone" class="form-control" placeholder="Enter guardian's phone">
+                            </div>
+                            <div class="validation-message" id="guardianPhoneValidation"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Documents Section -->
+                <div class="form-section" id="section3">
+                    <h3 class="section-title">
+                        <i class="fas fa-file-upload"></i> Document Upload
+                    </h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Profile Photo</label>
+                            <div class="file-upload" onclick="document.getElementById('photo').click()">
+                                <i class="fas fa-camera"></i>
+                                <div class="file-upload-text">Click to upload photo</div>
+                                <div class="file-upload-subtext">JPG, PNG up to 2MB</div>
+                                <input type="file" id="photo" name="photo" accept="image/*" style="display: none;">
+                            </div>
+                            <div class="validation-message" id="photoValidation"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Marksheet</label>
+                            <div class="file-upload" onclick="document.getElementById('marksheet').click()">
+                                <i class="fas fa-file-pdf"></i>
+                                <div class="file-upload-text">Click to upload marksheet</div>
+                                <div class="file-upload-subtext">PDF up to 5MB</div>
+                                <input type="file" id="marksheet" name="marksheet" accept=".pdf" style="display: none;">
+                            </div>
+                            <div class="validation-message" id="marksheetValidation"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">ID Proof</label>
+                            <div class="file-upload" onclick="document.getElementById('id_proof').click()">
+                                <i class="fas fa-id-card"></i>
+                                <div class="file-upload-text">Click to upload ID proof</div>
+                                <div class="file-upload-subtext">PDF, JPG up to 5MB</div>
+                                <input type="file" id="id_proof" name="id_proof" accept=".pdf,.jpg,.jpeg,.png" style="display: none;">
+                            </div>
+                            <div class="validation-message" id="idProofValidation"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Address Proof</label>
+                            <div class="file-upload" onclick="document.getElementById('address_proof').click()">
+                                <i class="fas fa-home"></i>
+                                <div class="file-upload-text">Click to upload address proof</div>
+                                <div class="file-upload-subtext">PDF, JPG up to 5MB</div>
+                                <input type="file" id="address_proof" name="address_proof" accept=".pdf,.jpg,.jpeg,.png" style="display: none;">
+                            </div>
+                            <div class="validation-message" id="addressProofValidation"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Buttons -->
+                <div class="form-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="goBack()">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="fas fa-user-plus"></i> Submit Admission
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentStep = 1;
+    const totalSteps = 4;
+
+    // Form validation
+    function validateField(field, rules) {
+        const value = field.value.trim();
+        const validationDiv = document.getElementById(field.name + 'Validation');
+        
+        for (let rule of rules) {
+            if (!rule.test(value)) {
+                validationDiv.textContent = rule.message;
+                validationDiv.className = 'validation-message validation-error';
+                field.classList.add('invalid');
+                return false;
+            }
+        }
+        
+        validationDiv.textContent = '✓ Valid';
+        validationDiv.className = 'validation-message validation-success';
+        field.classList.remove('invalid');
+        field.classList.add('valid');
+        return true;
+    }
+
+    // Validation rules
+    const validationRules = {
+        name: [
+            { test: (val) => val.length >= 2, message: 'Name must be at least 2 characters' },
+            { test: (val) => /^[a-zA-Z\s]+$/.test(val), message: 'Name can only contain letters and spaces' }
+        ],
+        email: [
+            { test: (val) => val.length > 0, message: 'Email is required' },
+            { test: (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), message: 'Please enter a valid email address' }
+        ],
+        phone: [
+            { test: (val) => val.length > 0, message: 'Phone number is required' },
+            { test: (val) => /^[0-9]{10}$/.test(val), message: 'Phone number must be 10 digits' }
+        ],
+        course: [
+            { test: (val) => val.length > 0, message: 'Please select a course' }
+        ],
+        year: [
+            { test: (val) => val.length > 0, message: 'Please select a year' }
+        ]
+    };
+
+    // Real-time validation
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add event listeners for real-time validation
+        Object.keys(validationRules).forEach(fieldName => {
+            const field = document.querySelector(`[name="${fieldName}"]`);
+            if (field) {
+                field.addEventListener('blur', function() {
+                    validateField(this, validationRules[fieldName]);
+                });
+                
+                field.addEventListener('input', function() {
+                    if (this.classList.contains('invalid')) {
+                        validateField(this, validationRules[fieldName]);
+                    }
+                });
+            }
+        });
+
+        // File upload handling
+        setupFileUploads();
+        
+        // Form submission
+        document.getElementById('admissionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitForm();
+        });
+    });
+
+    // File upload setup
+    function setupFileUploads() {
+        const fileInputs = document.querySelectorAll('input[type="file"]');
+        
+        fileInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const uploadDiv = this.parentElement;
+                    uploadDiv.innerHTML = `
+                        <i class="fas fa-check-circle" style="color: #56ab2f;"></i>
+                        <div class="file-upload-text" style="color: #56ab2f;">${file.name}</div>
+                        <div class="file-upload-subtext">File uploaded successfully</div>
+                    `;
+                    uploadDiv.style.borderColor = '#56ab2f';
+                    uploadDiv.style.background = 'rgba(86, 171, 47, 0.1)';
+                }
+            });
+        });
+    }
+
+    // Progress indicator update
+    function updateProgress(step) {
+        for (let i = 1; i <= totalSteps; i++) {
+            const stepElement = document.getElementById(`step${i}`);
+            if (i < step) {
+                stepElement.className = 'step completed';
+            } else if (i === step) {
+                stepElement.className = 'step active';
+            } else {
+                stepElement.className = 'step';
+            }
+        }
+        currentStep = step;
+    }
+
+    // Go back function
+    function goBack() {
+        window.history.back();
+    }
+
+    // Form submission
+    function submitForm() {
+        const submitBtn = document.getElementById('submitBtn');
+        const form = document.getElementById('admissionForm');
+        
+        // Show loading state
+        submitBtn.innerHTML = '<span class="spinner"></span> Processing...';
+        submitBtn.disabled = true;
+        
+        // Validate all required fields
+        let isValid = true;
+        Object.keys(validationRules).forEach(fieldName => {
+            const field = document.querySelector(`[name="${fieldName}"]`);
+            if (field && !validateField(field, validationRules[fieldName])) {
+                isValid = false;
+            }
+        });
+        
+        if (!isValid) {
+            submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Submit Admission';
+            submitBtn.disabled = false;
+            alert('Please fix the validation errors before submitting.');
+            return;
+        }
+        
+        // Submit the form
+        setTimeout(() => {
+            form.submit();
+        }, 1000);
+    }
+
+    // Drag and drop for file uploads
+    document.querySelectorAll('.file-upload').forEach(uploadDiv => {
+        uploadDiv.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+        
+        uploadDiv.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+        });
+        
+        uploadDiv.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const input = this.querySelector('input[type="file"]');
+                input.files = files;
+                input.dispatchEvent(new Event('change'));
+            }
+        });
+    });
+
+    // Animate form sections on load
+    document.addEventListener('DOMContentLoaded', function() {
+        const sections = document.querySelectorAll('.form-section');
+        sections.forEach((section, index) => {
+            section.style.animationDelay = `${index * 0.2}s`;
+            section.classList.add('animate-fadeInUp');
+        });
+    });
+
+    // Add smooth scrolling to form sections
+    function scrollToSection(sectionId) {
+        document.getElementById(sectionId).scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
+
+    // Auto-save form data to localStorage
+    function autoSave() {
+        const formData = new FormData(document.getElementById('admissionForm'));
+        const data = {};
+        
+        for (let [key, value] of formData.entries()) {
+            data[key] = value;
+        }
+        
+        localStorage.setItem('admissionFormData', JSON.stringify(data));
+    }
+
+    // Load saved form data
+    function loadSavedData() {
+        const savedData = localStorage.getItem('admissionFormData');
+        if (savedData) {
+            const data = JSON.parse(savedData);
+            
+            Object.keys(data).forEach(key => {
+                const field = document.querySelector(`[name="${key}"]`);
+                if (field && data[key]) {
+                    field.value = data[key];
+                }
+            });
+        }
+    }
+
+    // Auto-save on input change
+    document.getElementById('admissionForm').addEventListener('input', autoSave);
+
+    // Load saved data on page load
+    document.addEventListener('DOMContentLoaded', loadSavedData);
+
+    // Clear saved data on successful submission
+    document.getElementById('admissionForm').addEventListener('submit', function() {
+        localStorage.removeItem('admissionFormData');
+    });
+</script>
+{% endblock %}

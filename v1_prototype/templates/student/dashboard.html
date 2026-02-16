@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - College ERP</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard student-dashboard">
+        <div class="sidebar">
+            <div class="student-profile">
+                <div class="avatar">
+                    <img src="{{ url_for('static', filename='img/default-avatar.png') }}" alt="Student Avatar">
+                    <div class="level-badge">Level 5</div>
+                </div>
+                <h3>John Doe</h3>
+                <div class="progress-bar">
+                    <div class="progress" style="width: 75%"></div>
+                    <span>750/1000 XP</span>
+                </div>
+            </div>
+            <nav class="menu">
+                <a href="#" class="active"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="#"><i class="fas fa-book"></i> Courses</a>
+                <a href="#"><i class="fas fa-money-bill"></i> Fees</a>
+                <a href="#"><i class="fas fa-bed"></i> Hostel</a>
+                <a href="#"><i class="fas fa-calendar"></i> Attendance</a>
+                <a href="#"><i class="fas fa-trophy"></i> Achievements</a>
+            </nav>
+        </div>
+        
+        <div class="main-content">
+            <div class="achievements-section fade-in">
+                <h2>Your Achievements</h2>
+                <div class="badges-container">
+                    <div class="badge" title="Perfect Attendance">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="badge" title="Academic Excellence">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="badge locked" title="Sports Champion">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quick-stats">
+                <div class="stat-card fade-in">
+                    <div class="stat-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Current GPA</h3>
+                        <p>3.8/4.0</p>
+                    </div>
+                </div>
+                <div class="stat-card fade-in">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Attendance</h3>
+                        <p>95%</p>
+                    </div>
+                </div>
+                <div class="stat-card fade-in">
+                    <div class="stat-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Reward Points</h3>
+                        <p>750</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="current-tasks slide-in">
+                <h2>Daily Quests</h2>
+                <div class="task-list">
+                    <div class="task-item">
+                        <div class="task-check">
+                            <input type="checkbox" id="task1">
+                            <label for="task1">Attend all classes today</label>
+                        </div>
+                        <span class="reward">+50 XP</span>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-check">
+                            <input type="checkbox" id="task2">
+                            <label for="task2">Submit Mathematics Assignment</label>
+                        </div>
+                        <span class="reward">+100 XP</span>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-check">
+                            <input type="checkbox" id="task3">
+                            <label for="task3">Participate in class discussion</label>
+                        </div>
+                        <span class="reward">+75 XP</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="upcoming-events slide-in">
+                <h2>Upcoming Events</h2>
+                <div class="event-timeline">
+                    <div class="event-item">
+                        <div class="event-date">
+                            <span class="day">15</span>
+                            <span class="month">OCT</span>
+                        </div>
+                        <div class="event-content">
+                            <h3>Mid-Term Examination</h3>
+                            <p>Mathematics - Room 101</p>
+                        </div>
+                    </div>
+                    <div class="event-item">
+                        <div class="event-date">
+                            <span class="day">18</span>
+                            <span class="month">OCT</span>
+                        </div>
+                        <div class="event-content">
+                            <h3>Project Submission</h3>
+                            <p>Computer Science</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/student_dashboard.js') }}"></script>
+</body>
+</html>

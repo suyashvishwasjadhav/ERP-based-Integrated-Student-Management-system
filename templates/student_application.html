@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Application - College ERP</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 2rem 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .application-form {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 3rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            color: #a8e6cf;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+
+        .form-input {
+            padding: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #56ab2f;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 20px rgba(86, 171, 47, 0.3);
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .form-select {
+            padding: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #56ab2f;
+            box-shadow: 0 0 20px rgba(86, 171, 47, 0.3);
+        }
+
+        .form-select option {
+            background: #1a1a2e;
+            color: white;
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            width: 0.1px;
+            height: 0.1px;
+            opacity: 0;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .file-upload-label:hover, .file-upload-label:focus {
+            border-color: #56ab2f;
+            background: rgba(86, 171, 47, 0.1);
+            outline: none;
+        }
+
+        .file-name {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: white;
+            text-align: center;
+            word-break: break-all;
+        }
+
+        .file-upload.has-file .file-upload-label {
+            border-color: #56ab2f;
+            background: rgba(86, 171, 47, 0.1);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #56ab2f;
+        }
+
+        .checkbox-group label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .submit-section {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+            color: white;
+            padding: 1.2rem 3rem;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-submit::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-submit:hover::before {
+            left: 100%;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(86, 171, 47, 0.4);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .progress-step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 0.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .progress-step.active {
+            background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+            transform: scale(1.1);
+        }
+
+        .progress-step.completed {
+            background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+        }
+
+        .progress-step::after {
+            content: '';
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .progress-step:last-child::after {
+            display: none;
+        }
+
+        .progress-step.completed::after {
+            background: #56ab2f;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .fade-in:nth-child(1) { animation-delay: 0.1s; }
+        .fade-in:nth-child(2) { animation-delay: 0.2s; }
+        .fade-in:nth-child(3) { animation-delay: 0.3s; }
+        .fade-in:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .application-form {
+                padding: 2rem 1.5rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .back-btn {
+                position: relative;
+                top: auto;
+                left: auto;
+                margin-bottom: 2rem;
+            }
+        }
+
+        /* File upload drag and drop styles */
+        .file-upload.drag-over .file-upload-label {
+            border-color: #56ab2f;
+            background: rgba(86, 171, 47, 0.2);
+            transform: scale(1.02);
+        }
+
+        .file-upload .file-upload-label:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(86, 171, 47, 0.5);
+        }
+
+        /* Form validation styles */
+        .form-input.error {
+            border-color: #ff6b6b;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .form-input.success {
+            border-color: #56ab2f;
+            box-shadow: 0 0 20px rgba(86, 171, 47, 0.3);
+        }
+
+        .error-message {
+            color: #ff6b6b;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .success-message {
+            color: #56ab2f;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <a href="/student_portal" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Portal
+    </a>
+
+    <div class="container">
+        <div class="header fade-in">
+            <h1>Student Application</h1>
+            <p>Apply for admission to our prestigious college</p>
+        </div>
+
+        <div class="progress-indicator fade-in">
+            <div class="progress-step active">1</div>
+            <div class="progress-step">2</div>
+            <div class="progress-step">3</div>
+            <div class="progress-step">4</div>
+        </div>
+
+        <form class="application-form fade-in" id="applicationForm" method="POST" action="/student/apply" enctype="multipart/form-data">
+            <!-- Personal Information -->
+            <div class="form-section">
+                <h2 class="section-title">
+                    <i class="fas fa-user"></i>
+                    Personal Information
+                </h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">First Name *</label>
+                        <input type="text" class="form-input" name="first_name" required placeholder="Enter your first name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Last Name *</label>
+                        <input type="text" class="form-input" name="last_name" required placeholder="Enter your last name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Date of Birth *</label>
+                        <input type="date" class="form-input" name="date_of_birth" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Gender *</label>
+                        <select class="form-select" name="gender" required>
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone Number *</label>
+                        <input type="tel" class="form-input" name="phone" required placeholder="+91 98765 43210">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email Address *</label>
+                        <input type="email" class="form-input" name="email" required placeholder="student@example.com">
+                    </div>
+                    <div class="form-group full-width">
+                        <label class="form-label">Address *</label>
+                        <textarea class="form-input" name="address" rows="3" required placeholder="Enter your complete address"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Academic Information -->
+            <div class="form-section">
+                <h2 class="section-title">
+                    <i class="fas fa-graduation-cap"></i>
+                    Academic Information
+                </h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Course Applied For *</label>
+                        <select class="form-select" name="course" required>
+                            <option value="">Select Course</option>
+                            <option value="Computer Science Engineering">Computer Science Engineering</option>
+                            <option value="Electronics Engineering">Electronics Engineering</option>
+                            <option value="Mechanical Engineering">Mechanical Engineering</option>
+                            <option value="Civil Engineering">Civil Engineering</option>
+                            <option value="Business Administration">Business Administration</option>
+                            <option value="Arts">Arts</option>
+                            <option value="Science">Science</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Previous Qualification *</label>
+                        <select class="form-select" name="qualification" required>
+                            <option value="">Select Qualification</option>
+                            <option value="10+2">10+2</option>
+                            <option value="Diploma">Diploma</option>
+                            <option value="Bachelor's Degree">Bachelor's Degree</option>
+                            <option value="Master's Degree">Master's Degree</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Previous Institution *</label>
+                        <input type="text" class="form-input" name="previous_institution" required placeholder="Name of your previous school/college">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Marks Obtained (%) *</label>
+                        <input type="number" class="form-input" name="marks" required placeholder="85" min="0" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Year of Passing *</label>
+                        <input type="number" class="form-input" name="passing_year" required placeholder="2023" min="2010" max="2024">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Entrance Exam Score</label>
+                        <input type="number" class="form-input" name="entrance_score" placeholder="JEE Main/Other exam score">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documents Upload -->
+            <div class="form-section">
+                <h2 class="section-title">
+                    <i class="fas fa-file-upload"></i>
+                    Document Upload
+                </h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Photograph *</label>
+                        <div class="file-upload">
+                            <input type="file" name="photo" id="photo" accept="image/*" required>
+                            <label for="photo" class="file-upload-label">
+                                <i class="fas fa-camera"></i>
+                                <span>Upload Photo</span>
+                            </label>
+                            <div class="file-name"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Marksheet *</label>
+                        <div class="file-upload">
+                            <input type="file" name="marksheet" id="marksheet" accept=".pdf,.jpg,.jpeg,.png" required>
+                            <label for="marksheet" class="file-upload-label">
+                                <i class="fas fa-file-pdf"></i>
+                                <span>Upload Marksheet</span>
+                            </label>
+                            <div class="file-name"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Identity Proof *</label>
+                        <div class="file-upload">
+                            <input type="file" name="id_proof" id="id_proof" accept=".pdf,.jpg,.jpeg,.png" required>
+                            <label for="id_proof" class="file-upload-label">
+                                <i class="fas fa-id-card"></i>
+                                <span>Upload ID Proof</span>
+                            </label>
+                            <div class="file-name"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Additional Documents</label>
+                        <div class="file-upload">
+                            <input type="file" name="additional_docs" id="additional_docs" accept=".pdf,.jpg,.jpeg,.png" multiple>
+                            <label for="additional_docs" class="file-upload-label">
+                                <i class="fas fa-folder-plus"></i>
+                                <span>Upload Additional Docs</span>
+                            </label>
+                            <div class="file-name"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terms and Conditions -->
+            <div class="form-section">
+                <h2 class="section-title">
+                    <i class="fas fa-shield-alt"></i>
+                    Terms & Conditions
+                </h2>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="terms" name="terms" required>
+                    <label for="terms">I agree to the terms and conditions of admission *</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="privacy" name="privacy" required>
+                    <label for="privacy">I agree to the privacy policy and data usage terms *</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="documents" name="documents" required>
+                    <label for="documents">I confirm that all uploaded documents are genuine *</label>
+                </div>
+            </div>
+
+            <div class="submit-section">
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-paper-plane"></i>
+                    Submit Application
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Form validation
+            const form = document.getElementById('applicationForm');
+            const inputs = form.querySelectorAll('input, select, textarea');
+            
+            inputs.forEach(input => {
+                input.addEventListener('blur', validateField);
+                input.addEventListener('input', clearError);
+            });
+
+            function validateField(e) {
+                const field = e.target;
+                const value = field.value.trim();
+                
+                // Remove previous validation classes
+                field.classList.remove('error', 'success');
+                const errorMsg = field.parentNode.querySelector('.error-message');
+                if (errorMsg) errorMsg.remove();
+
+                // Validate required fields
+                if (field.hasAttribute('required') && !value) {
+                    showError(field, 'This field is required');
+                    return false;
+                }
+
+                // Email validation
+                if (field.type === 'email' && value) {
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(value)) {
+                        showError(field, 'Please enter a valid email address');
+                        return false;
+                    }
+                }
+
+                // Phone validation
+                if (field.type === 'tel' && value) {
+                    const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,}$/;
+                    if (!phoneRegex.test(value)) {
+                        showError(field, 'Please enter a valid phone number');
+                        return false;
+                    }
+                }
+
+                // Marks validation
+                if (field.name === 'marks' && value) {
+                    const marks = parseInt(value);
+                    if (marks < 0 || marks > 100) {
+                        showError(field, 'Marks must be between 0 and 100');
+                        return false;
+                    }
+                }
+
+                // Show success state
+                if (value) {
+                    field.classList.add('success');
+                }
+                return true;
+            }
+
+            function showError(field, message) {
+                field.classList.add('error');
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.textContent = message;
+                field.parentNode.appendChild(errorDiv);
+            }
+
+            function clearError(e) {
+                const field = e.target;
+                field.classList.remove('error');
+                const errorMsg = field.parentNode.querySelector('.error-message');
+                if (errorMsg) errorMsg.remove();
+            }
+
+            // File upload handling
+            const fileInputs = document.querySelectorAll('input[type="file"]');
+            fileInputs.forEach(input => {
+                const fileUpload = input.closest('.file-upload');
+                const fileNameDiv = fileUpload.querySelector('.file-name');
+                const label = fileUpload.querySelector('.file-upload-label');
+                
+                // Handle keyboard accessibility
+                label.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        input.click();
+                    }
+                });
+
+                input.addEventListener('change', function(e) {
+                    const files = e.target.files;
+                    
+                    if (files.length > 0) {
+                        fileUpload.classList.add('has-file');
+                        if (files.length === 1) {
+                            const fileName = files[0].name;
+                            fileNameDiv.innerHTML = `
+                                <i class="fas fa-check-circle" style="color: #56ab2f; margin-right: 5px;"></i>
+                                ${fileName}
+                            `;
+                        } else {
+                            fileNameDiv.innerHTML = `
+                                <i class="fas fa-check-circle" style="color: #56ab2f; margin-right: 5px;"></i>
+                                ${files.length} files selected
+                            `;
+                        }
+                    } else {
+                        fileUpload.classList.remove('has-file');
+                        fileNameDiv.textContent = '';
+                    }
+                });
+
+                // Prevent the default drag behavior
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    fileUpload.addEventListener(eventName, preventDefaults, false);
+                });
+
+                function preventDefaults(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+
+                // Handle drag and drop
+                fileUpload.addEventListener('dragenter', () => fileUpload.classList.add('drag-over'));
+                fileUpload.addEventListener('dragleave', () => fileUpload.classList.remove('drag-over'));
+                fileUpload.addEventListener('drop', function(e) {
+                    fileUpload.classList.remove('drag-over');
+                    const dt = e.dataTransfer;
+                    const files = dt.files;
+                    input.files = files;
+                    
+                    // Trigger change event
+                    const event = new Event('change');
+                    input.dispatchEvent(event);
+                });
+            });
+
+            // Progress indicator animation
+            const progressSteps = document.querySelectorAll('.progress-step');
+            let currentStep = 0;
+
+            function updateProgress() {
+                progressSteps.forEach((step, index) => {
+                    step.classList.remove('active', 'completed');
+                    if (index < currentStep) {
+                        step.classList.add('completed');
+                    } else if (index === currentStep) {
+                        step.classList.add('active');
+                    }
+                });
+            }
+
+            // Simulate progress updates
+            setInterval(() => {
+                if (currentStep < progressSteps.length - 1) {
+                    currentStep++;
+                    updateProgress();
+                }
+            }, 2000);
+
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Validate all fields
+                let isValid = true;
+                inputs.forEach(input => {
+                    if (!validateField({ target: input })) {
+                        isValid = false;
+                    }
+                });
+
+                // Validate file uploads
+                fileInputs.forEach(input => {
+                    if (input.hasAttribute('required') && (!input.files || input.files.length === 0)) {
+                        const fieldName = input.name.replace('_', ' ');
+                        showError(input, `Please upload your ${fieldName}`);
+                        isValid = false;
+                    }
+                });
+
+                if (isValid) {
+                    // Show loading state
+                    const submitBtn = form.querySelector('.btn-submit');
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+                    submitBtn.disabled = true;
+
+                    // Create FormData object
+                    const formData = new FormData(form);
+                    
+                    // Submit form data
+                    fetch('/student/apply', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Application submitted successfully! You will receive a confirmation email shortly.');
+                            window.location.href = '/student_portal';
+                        } else {
+                            alert(data.message || 'Error submitting application. Please try again.');
+                            submitBtn.innerHTML = originalText;
+                            submitBtn.disabled = false;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error submitting application. Please try again.');
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                    });
+                } else {
+                    alert('Please fill all required fields correctly.');
+                }
+            });
+
+            // Auto-save functionality
+            let autoSaveTimeout;
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    clearTimeout(autoSaveTimeout);
+                    autoSaveTimeout = setTimeout(() => {
+                        // Save form data to localStorage
+                        const formData = new FormData(form);
+                        const data = {};
+                        for (let [key, value] of formData.entries()) {
+                            if (input.type !== 'file') {
+                                data[key] = value;
+                            }
+                        }
+                        localStorage.setItem('applicationForm', JSON.stringify(data));
+                    }, 1000);
+                });
+            });
+
+            // Load saved data
+            const savedData = localStorage.getItem('applicationForm');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                Object.keys(data).forEach(key => {
+                    const input = form.querySelector(`[name="${key}"]`);
+                    if (input && input.type !== 'file') {
+                        input.value = data[key];
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

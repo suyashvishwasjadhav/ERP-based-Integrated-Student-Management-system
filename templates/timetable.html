@@ -1,0 +1,876 @@
+{% extends "base.html" %}
+
+{% block title %}Timetable - College ERP System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .timetable-container {
+        padding: 2rem 0;
+        min-height: calc(100vh - 80px);
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        animation: fadeInDown 1s ease-out;
+    }
+
+    .page-title {
+        font-size: 3rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+    }
+
+    .page-subtitle {
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 400;
+    }
+
+    /* Timetable Controls */
+    .timetable-controls {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 3rem;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideInUp 0.8s ease-out;
+    }
+
+    .controls-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .controls-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .controls-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        align-items: end;
+    }
+
+    .form-group {
+        margin-bottom: 0;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #333;
+        font-size: 0.9rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid #e1e5e9;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.8);
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        background: white;
+    }
+
+    /* Timetable Grid */
+    .timetable-grid {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideInUp 0.8s ease-out;
+        overflow-x: auto;
+    }
+
+    .timetable-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        min-width: 800px;
+    }
+
+    .timetable-table th {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        font-weight: 600;
+        padding: 1.5rem 1rem;
+        text-align: center;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-right: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .timetable-table th:last-child {
+        border-right: none;
+    }
+
+    .timetable-table td {
+        padding: 1.5rem 1rem;
+        border: 1px solid #f0f0f0;
+        vertical-align: top;
+        text-align: center;
+        transition: all 0.3s ease;
+        min-width: 120px;
+    }
+
+    .timetable-table tr:hover td {
+        background: rgba(102, 126, 234, 0.02);
+    }
+
+    /* Time Slot */
+    .time-slot {
+        font-weight: 700;
+        color: #333;
+        background: rgba(102, 126, 234, 0.1);
+        border-radius: 8px;
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    /* Subject Card */
+    .subject-card {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .subject-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .subject-card:hover::before {
+        left: 100%;
+    }
+
+    .subject-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .subject-card.lab {
+        background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+    }
+
+    .subject-card.tutorial {
+        background: linear-gradient(135deg, #ffc107, #ff9800);
+    }
+
+    .subject-card.seminar {
+        background: linear-gradient(135deg, #ff416c, #ff4b2b);
+    }
+
+    .subject-name {
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .subject-teacher {
+        font-size: 0.8rem;
+        opacity: 0.9;
+        margin-bottom: 0.25rem;
+    }
+
+    .subject-room {
+        font-size: 0.7rem;
+        opacity: 0.8;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.25rem 0.5rem;
+        border-radius: 8px;
+        display: inline-block;
+    }
+
+    /* Day Headers */
+    .day-header {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        font-weight: 700;
+        text-align: center;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+
+    /* Empty Slot */
+    .empty-slot {
+        color: #ccc;
+        font-style: italic;
+        font-size: 0.8rem;
+    }
+
+    /* Timetable Actions */
+    .timetable-actions {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .action-btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-secondary {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        border: 2px solid #667eea;
+    }
+
+    .btn-secondary:hover {
+        background: #667eea;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+        color: white;
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(86, 171, 47, 0.3);
+    }
+
+    /* Legend */
+    .timetable-legend {
+        display: flex;
+        gap: 2rem;
+        justify-content: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .legend-color {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+    }
+
+    .legend-lecture {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+
+    .legend-lab {
+        background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+    }
+
+    .legend-tutorial {
+        background: linear-gradient(135deg, #ffc107, #ff9800);
+    }
+
+    .legend-seminar {
+        background: linear-gradient(135deg, #ff416c, #ff4b2b);
+    }
+
+    /* Current Time Indicator */
+    .current-time {
+        background: rgba(255, 65, 108, 0.1);
+        border: 2px solid #ff416c;
+        border-radius: 8px;
+        animation: pulse 2s infinite;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .controls-form {
+            grid-template-columns: 1fr;
+        }
+
+        .timetable-table {
+            font-size: 0.8rem;
+        }
+
+        .timetable-table th,
+        .timetable-table td {
+            padding: 1rem 0.5rem;
+        }
+
+        .subject-card {
+            padding: 0.75rem;
+        }
+
+        .subject-name {
+            font-size: 0.8rem;
+        }
+
+        .subject-teacher {
+            font-size: 0.7rem;
+        }
+
+        .subject-room {
+            font-size: 0.6rem;
+        }
+
+        .timetable-legend {
+            gap: 1rem;
+        }
+
+        .timetable-actions {
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+        }
+    }
+
+    /* Animations */
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.7;
+        }
+    }
+
+    /* Loading States */
+    .loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Print Styles */
+    @media print {
+        .timetable-controls,
+        .timetable-actions,
+        .timetable-legend {
+            display: none;
+        }
+        
+        .timetable-grid {
+            box-shadow: none;
+            border: 2px solid #333;
+        }
+        
+        .subject-card {
+            background: #f0f0f0 !important;
+            color: #333 !important;
+            border: 1px solid #333;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="timetable-container">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-clock"></i> Academic Timetable
+            </h1>
+            <p class="page-subtitle">View and manage class schedules and timetables</p>
+        </div>
+
+        <!-- Timetable Controls -->
+        <div class="timetable-controls">
+            <div class="controls-header">
+                <h2 class="controls-title">
+                    <i class="fas fa-filter"></i> Timetable Filters
+                </h2>
+                <button class="btn btn-primary" onclick="generateTimetable()">
+                    <i class="fas fa-sync-alt"></i> Generate New Timetable
+                </button>
+            </div>
+
+            <form class="controls-form" id="timetableFilters">
+                <div class="form-group">
+                    <label class="form-label">Academic Year</label>
+                    <select class="form-control" id="academicYear">
+                        <option value="2024-25">2024-25</option>
+                        <option value="2023-24">2023-24</option>
+                        <option value="2022-23">2022-23</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Course</label>
+                    <select class="form-control" id="courseFilter">
+                        <option value="">All Courses</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Mechanical">Mechanical</option>
+                        <option value="Civil">Civil</option>
+                        <option value="Electrical">Electrical</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Year</label>
+                    <select class="form-control" id="yearFilter">
+                        <option value="">All Years</option>
+                        <option value="1">First Year</option>
+                        <option value="2">Second Year</option>
+                        <option value="3">Third Year</option>
+                        <option value="4">Fourth Year</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Semester</label>
+                    <select class="form-control" id="semesterFilter">
+                        <option value="">All Semesters</option>
+                        <option value="1">Semester 1</option>
+                        <option value="2">Semester 2</option>
+                        <option value="3">Semester 3</option>
+                        <option value="4">Semester 4</option>
+                        <option value="5">Semester 5</option>
+                        <option value="6">Semester 6</option>
+                        <option value="7">Semester 7</option>
+                        <option value="8">Semester 8</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <button type="button" class="btn btn-secondary" onclick="applyFilters()">
+                        <i class="fas fa-search"></i> Apply Filters
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Timetable Legend -->
+        <div class="timetable-legend">
+            <div class="legend-item">
+                <div class="legend-color legend-lecture"></div>
+                <span>Lecture</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color legend-lab"></div>
+                <span>Laboratory</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color legend-tutorial"></div>
+                <span>Tutorial</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color legend-seminar"></div>
+                <span>Seminar</span>
+            </div>
+        </div>
+
+        <!-- Timetable Actions -->
+        <div class="timetable-actions">
+            <button class="action-btn btn-primary" onclick="printTimetable()">
+                <i class="fas fa-print"></i> Print Timetable
+            </button>
+            <button class="action-btn btn-secondary" onclick="exportTimetable()">
+                <i class="fas fa-download"></i> Export PDF
+            </button>
+            <button class="action-btn btn-success" onclick="shareTimetable()">
+                <i class="fas fa-share"></i> Share Timetable
+            </button>
+            <button class="action-btn btn-secondary" onclick="refreshTimetable()">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+        </div>
+
+        <!-- Timetable Grid -->
+        <div class="timetable-grid">
+            <table class="timetable-table">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Monday</th>
+                        <th>Tuesday</th>
+                        <th>Wednesday</th>
+                        <th>Thursday</th>
+                        <th>Friday</th>
+                        <th>Saturday</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for time_slot in ['09:00-10:00', '10:00-11:00', '11:00-12:00', '12:00-13:00', '14:00-15:00', '15:00-16:00', '16:00-17:00'] %}
+                    <tr>
+                        <td class="time-slot">{{ time_slot }}</td>
+                        {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] %}
+                        <td>
+                            {% set day_timetable = timetable|selectattr('day', 'equalto', day)|selectattr('time_slot', 'equalto', time_slot)|first %}
+                            {% if day_timetable %}
+                                {% if day_timetable.subject in ['Computer Science Lab', 'Electronics Lab', 'Physics Lab'] %}
+                                <div class="subject-card lab" onclick="showSubjectDetails('{{ day_timetable.subject }}', '{{ day_timetable.teacher }}', '{{ day_timetable.room }}')">
+                                    <div class="subject-name">{{ day_timetable.subject }}</div>
+                                    <div class="subject-teacher">{{ day_timetable.teacher }}</div>
+                                    <div class="subject-room">{{ day_timetable.room }}</div>
+                                </div>
+                                {% elif 'Tutorial' in day_timetable.subject %}
+                                <div class="subject-card tutorial" onclick="showSubjectDetails('{{ day_timetable.subject }}', '{{ day_timetable.teacher }}', '{{ day_timetable.room }}')">
+                                    <div class="subject-name">{{ day_timetable.subject }}</div>
+                                    <div class="subject-teacher">{{ day_timetable.teacher }}</div>
+                                    <div class="subject-room">{{ day_timetable.room }}</div>
+                                </div>
+                                {% elif 'Seminar' in day_timetable.subject %}
+                                <div class="subject-card seminar" onclick="showSubjectDetails('{{ day_timetable.subject }}', '{{ day_timetable.teacher }}', '{{ day_timetable.room }}')">
+                                    <div class="subject-name">{{ day_timetable.subject }}</div>
+                                    <div class="subject-teacher">{{ day_timetable.teacher }}</div>
+                                    <div class="subject-room">{{ day_timetable.room }}</div>
+                                </div>
+                                {% else %}
+                                <div class="subject-card" onclick="showSubjectDetails('{{ day_timetable.subject }}', '{{ day_timetable.teacher }}', '{{ day_timetable.room }}')">
+                                    <div class="subject-name">{{ day_timetable.subject }}</div>
+                                    <div class="subject-teacher">{{ day_timetable.teacher }}</div>
+                                    <div class="subject-room">{{ day_timetable.room }}</div>
+                                </div>
+                                {% endif %}
+                            {% else %}
+                                <div class="empty-slot">Free Period</div>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Current Time Indicator -->
+        <div style="text-align: center; margin-top: 2rem; padding: 1rem; background: rgba(255, 65, 108, 0.1); border-radius: 12px; border: 2px solid rgba(255, 65, 108, 0.2);">
+            <div style="font-weight: 600; color: #ff416c; margin-bottom: 0.5rem;">
+                <i class="fas fa-clock"></i> Current Time: <span id="currentTime"></span>
+            </div>
+            <div style="font-size: 0.9rem; color: #666;">
+                <span id="currentPeriod"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Subject Details Modal -->
+<div id="subjectModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5);">
+    <div class="modal-content" style="background: white; margin: 5% auto; padding: 2rem; border-radius: 20px; width: 90%; max-width: 500px; position: relative; animation: slideInDown 0.3s ease-out;">
+        <span class="close" onclick="closeSubjectModal()" style="position: absolute; right: 1rem; top: 1rem; font-size: 2rem; cursor: pointer; color: #666;">&times;</span>
+        <div id="subjectModalContent"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Current time display
+    function updateCurrentTime() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('en-US', { 
+            hour12: true, 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        });
+        document.getElementById('currentTime').textContent = timeString;
+        
+        // Determine current period
+        const hour = now.getHours();
+        const minute = now.getMinutes();
+        const currentMinutes = hour * 60 + minute;
+        
+        let currentPeriod = '';
+        if (currentMinutes >= 540 && currentMinutes < 600) {
+            currentPeriod = 'Period 1: 09:00-10:00';
+        } else if (currentMinutes >= 600 && currentMinutes < 660) {
+            currentPeriod = 'Period 2: 10:00-11:00';
+        } else if (currentMinutes >= 660 && currentMinutes < 720) {
+            currentPeriod = 'Period 3: 11:00-12:00';
+        } else if (currentMinutes >= 720 && currentMinutes < 780) {
+            currentPeriod = 'Period 4: 12:00-13:00 (Lunch Break)';
+        } else if (currentMinutes >= 840 && currentMinutes < 900) {
+            currentPeriod = 'Period 5: 14:00-15:00';
+        } else if (currentMinutes >= 900 && currentMinutes < 960) {
+            currentPeriod = 'Period 6: 15:00-16:00';
+        } else if (currentMinutes >= 960 && currentMinutes < 1020) {
+            currentPeriod = 'Period 7: 16:00-17:00';
+        } else {
+            currentPeriod = 'Outside class hours';
+        }
+        
+        document.getElementById('currentPeriod').textContent = currentPeriod;
+    }
+
+    // Update time every second
+    setInterval(updateCurrentTime, 1000);
+    updateCurrentTime(); // Initial call
+
+    // Highlight current time slot
+    function highlightCurrentTimeSlot() {
+        const now = new Date();
+        const hour = now.getHours();
+        const minute = now.getMinutes();
+        const currentMinutes = hour * 60 + minute;
+        
+        // Remove previous highlights
+        document.querySelectorAll('.current-time').forEach(cell => {
+            cell.classList.remove('current-time');
+        });
+        
+        // Determine which time slot is current
+        let timeSlot = '';
+        if (currentMinutes >= 540 && currentMinutes < 600) {
+            timeSlot = '09:00-10:00';
+        } else if (currentMinutes >= 600 && currentMinutes < 660) {
+            timeSlot = '10:00-11:00';
+        } else if (currentMinutes >= 660 && currentMinutes < 720) {
+            timeSlot = '11:00-12:00';
+        } else if (currentMinutes >= 720 && currentMinutes < 780) {
+            timeSlot = '12:00-13:00';
+        } else if (currentMinutes >= 840 && currentMinutes < 900) {
+            timeSlot = '14:00-15:00';
+        } else if (currentMinutes >= 900 && currentMinutes < 960) {
+            timeSlot = '15:00-16:00';
+        } else if (currentMinutes >= 960 && currentMinutes < 1020) {
+            timeSlot = '16:00-17:00';
+        }
+        
+        // Highlight current time slot
+        if (timeSlot) {
+            const rows = document.querySelectorAll('.timetable-table tbody tr');
+            rows.forEach(row => {
+                const timeCell = row.querySelector('.time-slot');
+                if (timeCell && timeCell.textContent === timeSlot) {
+                    const cells = row.querySelectorAll('td');
+                    cells.forEach(cell => {
+                        if (cell !== timeCell) {
+                            cell.classList.add('current-time');
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+    // Update highlight every minute
+    setInterval(highlightCurrentTimeSlot, 60000);
+    highlightCurrentTimeSlot(); // Initial call
+
+    // Timetable actions
+    function applyFilters() {
+        // In a real application, this would filter the timetable
+        alert('Filters applied successfully!');
+    }
+
+    function generateTimetable() {
+        if (confirm('Generate a new timetable? This will replace the current schedule.')) {
+            alert('New timetable generation started. This is a prototype feature.');
+        }
+    }
+
+    function printTimetable() {
+        window.print();
+    }
+
+    function exportTimetable() {
+        alert('Export to PDF functionality would be implemented here.');
+    }
+
+    function shareTimetable() {
+        if (navigator.share) {
+            navigator.share({
+                title: 'Academic Timetable',
+                text: 'Check out the academic timetable',
+                url: window.location.href
+            });
+        } else {
+            // Fallback for browsers that don't support Web Share API
+            navigator.clipboard.writeText(window.location.href);
+            alert('Timetable link copied to clipboard!');
+        }
+    }
+
+    function refreshTimetable() {
+        location.reload();
+    }
+
+    // Subject details modal
+    function showSubjectDetails(subject, teacher, room) {
+        const modalContent = `
+            <h2 style="color: #333; margin-bottom: 1.5rem;">Subject Details</h2>
+            <div style="display: grid; gap: 1rem;">
+                <div style="padding: 1rem; background: rgba(102, 126, 234, 0.05); border-radius: 8px; border-left: 4px solid #667eea;">
+                    <div style="font-weight: 600; color: #666; font-size: 0.8rem; margin-bottom: 0.25rem;">Subject</div>
+                    <div style="font-weight: 700; color: #333; font-size: 1.1rem;">${subject}</div>
+                </div>
+                <div style="padding: 1rem; background: rgba(102, 126, 234, 0.05); border-radius: 8px; border-left: 4px solid #667eea;">
+                    <div style="font-weight: 600; color: #666; font-size: 0.8rem; margin-bottom: 0.25rem;">Teacher</div>
+                    <div style="font-weight: 700; color: #333; font-size: 1.1rem;">${teacher}</div>
+                </div>
+                <div style="padding: 1rem; background: rgba(102, 126, 234, 0.05); border-radius: 8px; border-left: 4px solid #667eea;">
+                    <div style="font-weight: 600; color: #666; font-size: 0.8rem; margin-bottom: 0.25rem;">Room</div>
+                    <div style="font-weight: 700; color: #333; font-size: 1.1rem;">${room}</div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 2rem;">
+                <button onclick="closeSubjectModal()" class="btn btn-primary">
+                    <i class="fas fa-times"></i> Close
+                </button>
+            </div>
+        `;
+        
+        document.getElementById('subjectModalContent').innerHTML = modalContent;
+        document.getElementById('subjectModal').style.display = 'block';
+    }
+
+    function closeSubjectModal() {
+        document.getElementById('subjectModal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('subjectModal');
+        if (event.target === modal) {
+            closeSubjectModal();
+        }
+    }
+
+    // Add animations to elements
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate subject cards
+        const subjectCards = document.querySelectorAll('.subject-card');
+        subjectCards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.05}s`;
+            card.classList.add('animate-fadeInUp');
+        });
+
+        // Add hover effects to subject cards
+        subjectCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-3px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+    });
+
+    // Auto-refresh timetable every hour
+    function autoRefreshTimetable() {
+        const now = new Date();
+        const minutes = now.getMinutes();
+        
+        // Refresh at the top of each hour
+        if (minutes === 0) {
+            setTimeout(() => {
+                highlightCurrentTimeSlot();
+            }, 1000);
+        }
+    }
+
+    // Check every minute
+    setInterval(autoRefreshTimetable, 60000);
+</script>
+{% endblock %}

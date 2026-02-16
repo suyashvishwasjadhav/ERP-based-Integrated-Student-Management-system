@@ -1,0 +1,429 @@
+{% extends "base_student.html" %}
+
+{% block title %}Digital Library - College ERP{% endblock %}
+
+{% block extra_css %}
+<style>
+    .library-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .library-header h1 {
+        font-size: 3rem;
+        font-weight: 900;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .library-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .stat-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: #56ab2f;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        opacity: 0.8;
+        font-size: 0.9rem;
+    }
+
+    .search-section {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .search-form {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .search-input {
+        flex: 1;
+        padding: 1rem;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        font-size: 1rem;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #56ab2f;
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    .search-input::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .filter-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-btn {
+        padding: 0.5rem 1rem;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+        border-color: #56ab2f;
+        background: rgba(86, 171, 47, 0.2);
+        color: #a8e6cf;
+    }
+
+    .books-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+
+    .book-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .book-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+        border-color: rgba(86, 171, 47, 0.3);
+    }
+
+    .book-image {
+        width: 100%;
+        height: 200px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+        color: white;
+        margin-bottom: 1.5rem;
+    }
+
+    .book-title {
+        font-size: 1.3rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: white;
+    }
+
+    .book-author {
+        color: #a8e6cf;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .book-category {
+        background: rgba(86, 171, 47, 0.2);
+        color: #56ab2f;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        display: inline-block;
+        margin-bottom: 1rem;
+    }
+
+    .book-price {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #56ab2f;
+        margin-bottom: 1rem;
+    }
+
+    .book-stock {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        margin-bottom: 1.5rem;
+    }
+
+    .purchase-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+        color: white;
+        padding: 1rem;
+        border: none;
+        border-radius: 10px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .purchase-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(86, 171, 47, 0.3);
+    }
+
+    .purchase-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .book-description {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        margin-bottom: 1rem;
+        line-height: 1.5;
+    }
+
+    .wallet-info {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        text-align: center;
+    }
+
+    .wallet-balance {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #56ab2f;
+        margin-bottom: 0.5rem;
+    }
+
+    .wallet-label {
+        opacity: 0.8;
+        margin-bottom: 1rem;
+    }
+
+    .add-money-btn {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 10px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .add-money-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    @media (max-width: 768px) {
+        .search-form {
+            flex-direction: column;
+        }
+
+        .books-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .library-header h1 {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="library-header">
+    <h1>
+        <i class="fas fa-book"></i>
+        Digital Library
+    </h1>
+    <p>Browse and purchase books using your wallet balance</p>
+</div>
+
+<div class="library-stats">
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-book"></i>
+        </div>
+        <div class="stat-value">{{ books|length }}</div>
+        <div class="stat-label">Available Books</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-tags"></i>
+        </div>
+        <div class="stat-value">5</div>
+        <div class="stat-label">Categories</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-percentage"></i>
+        </div>
+        <div class="stat-value">20%</div>
+        <div class="stat-label">Student Discount</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-shipping-fast"></i>
+        </div>
+        <div class="stat-value">Instant</div>
+        <div class="stat-label">Digital Delivery</div>
+    </div>
+</div>
+
+<div class="wallet-info">
+    <div class="wallet-balance">₹{{ wallet_balance or 0 }}</div>
+    <div class="wallet-label">Wallet Balance</div>
+    <a href="/student/wallet" class="add-money-btn">
+        <i class="fas fa-wallet"></i> Manage Wallet
+    </a>
+</div>
+
+<div class="search-section">
+    <form class="search-form" id="searchForm">
+        <input type="text" class="search-input" placeholder="Search books by title, author, or category..." id="searchInput">
+        <button type="submit" class="btn-primary" style="padding: 1rem 2rem; background: linear-gradient(135deg, #56ab2f, #a8e6cf); border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer;">
+            <i class="fas fa-search"></i> Search
+        </button>
+    </form>
+    <div class="filter-buttons">
+        <button class="filter-btn active" data-category="all">All Books</button>
+        <button class="filter-btn" data-category="Engineering">Engineering</button>
+        <button class="filter-btn" data-category="Science">Science</button>
+        <button class="filter-btn" data-category="Literature">Literature</button>
+        <button class="filter-btn" data-category="Business">Business</button>
+        <button class="filter-btn" data-category="Technology">Technology</button>
+    </div>
+</div>
+
+<div class="books-grid" id="booksGrid">
+    {% for book in books %}
+    <div class="book-card" data-category="{{ book.category }}" data-title="{{ book.title.lower() }}" data-author="{{ book.author.lower() }}">
+        <div class="book-image">
+            <i class="fas fa-book"></i>
+        </div>
+        <div class="book-title">{{ book.title }}</div>
+        <div class="book-author">by {{ book.author }}</div>
+        <div class="book-category">{{ book.category }}</div>
+        <div class="book-description">{{ book.description or 'A comprehensive guide for students and professionals.' }}</div>
+        <div class="book-price">₹{{ book.price }}</div>
+        <div class="book-stock">{{ book.stock }} copies available</div>
+        <a href="/student/library/purchase/{{ book.id }}" class="purchase-btn" onclick="return confirm('Purchase {{ book.title }} for ₹{{ book.price }}?')">
+            <i class="fas fa-shopping-cart"></i>
+            Purchase Book
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const bookCards = document.querySelectorAll('.book-card');
+    
+    // Search functionality
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        filterBooks(searchTerm, getActiveCategory());
+    });
+    
+    // Filter functionality
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            const category = this.dataset.category;
+            filterBooks(searchInput.value.toLowerCase(), category);
+        });
+    });
+    
+    function getActiveCategory() {
+        const activeButton = document.querySelector('.filter-btn.active');
+        return activeButton ? activeButton.dataset.category : 'all';
+    }
+    
+    function filterBooks(searchTerm, category) {
+        bookCards.forEach(card => {
+            const title = card.dataset.title;
+            const author = card.dataset.author;
+            const bookCategory = card.dataset.category;
+            
+            const matchesSearch = title.includes(searchTerm) || author.includes(searchTerm);
+            const matchesCategory = category === 'all' || bookCategory === category;
+            
+            if (matchesSearch && matchesCategory) {
+                card.style.display = 'block';
+                card.style.animation = 'fadeInUp 0.5s ease';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+    
+    // Add fadeInUp animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,1011 @@
+{% extends "base.html" %}
+
+{% block title %}Allocate Hostel - College ERP System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .allocation-container {
+        padding: 2rem 0;
+        min-height: calc(100vh - 80px);
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        animation: fadeInDown 1s ease-out;
+    }
+
+    .page-title {
+        font-size: 3rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+    }
+
+    .page-subtitle {
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 400;
+    }
+
+    /* Form Container */
+    .form-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideInUp 0.8s ease-out;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    /* Form Sections */
+    .form-section {
+        margin-bottom: 2rem;
+        padding: 2rem;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.5);
+        border: 2px solid rgba(102, 126, 234, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .form-section.active {
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.05);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.1);
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-title i {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Form Grid */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #333;
+        font-size: 0.9rem;
+    }
+
+    .form-label.required::after {
+        content: ' *';
+        color: #ff416c;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid #e1e5e9;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.8);
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        background: white;
+    }
+
+    .form-control:invalid {
+        border-color: #ff416c;
+    }
+
+    .form-control:valid {
+        border-color: #56ab2f;
+    }
+
+    /* Input Groups */
+    .input-group {
+        position: relative;
+    }
+
+    .input-group i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #667eea;
+        z-index: 1;
+    }
+
+    .input-group .form-control {
+        padding-left: 3rem;
+    }
+
+    /* Student Info Display */
+    .student-info {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 2rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+        display: none;
+    }
+
+    .student-info.show {
+        display: block;
+        animation: slideInDown 0.5s ease-out;
+    }
+
+    .student-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .student-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .student-detail {
+        text-align: center;
+    }
+
+    .student-detail-label {
+        font-size: 0.8rem;
+        opacity: 0.8;
+        margin-bottom: 0.25rem;
+    }
+
+    .student-detail-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    /* Room Selection */
+    .room-selection {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .room-option {
+        border: 2px solid #e1e5e9;
+        border-radius: 12px;
+        padding: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: white;
+        position: relative;
+    }
+
+    .room-option:hover {
+        border-color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.1);
+    }
+
+    .room-option.selected {
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.05);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.1);
+    }
+
+    .room-option.selected::before {
+        content: '✓';
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        width: 30px;
+        height: 30px;
+        background: #667eea;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1.2rem;
+    }
+
+    .room-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .room-number {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #333;
+    }
+
+    .room-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .room-status.available {
+        background: rgba(86, 171, 47, 0.1);
+        color: #56ab2f;
+    }
+
+    .room-status.occupied {
+        background: rgba(255, 65, 108, 0.1);
+        color: #ff416c;
+    }
+
+    .room-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .room-detail {
+        text-align: center;
+        padding: 0.5rem;
+        background: rgba(102, 126, 234, 0.05);
+        border-radius: 8px;
+    }
+
+    .room-detail-label {
+        font-size: 0.7rem;
+        color: #666;
+        margin-bottom: 0.25rem;
+    }
+
+    .room-detail-value {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .room-occupancy {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .occupancy-bar {
+        flex: 1;
+        height: 8px;
+        background: rgba(102, 126, 234, 0.1);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .occupancy-fill {
+        height: 100%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        transition: width 0.3s ease;
+    }
+
+    .occupancy-text {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #333;
+        min-width: 50px;
+    }
+
+    .room-features {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .feature-tag {
+        padding: 0.25rem 0.5rem;
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        border-radius: 8px;
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+
+    /* Roommate Preferences */
+    .preferences-section {
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .preferences-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 1rem;
+    }
+
+    .preference-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .preference-option {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .preference-option:hover {
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    .preference-option.selected {
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.1);
+    }
+
+    .preference-checkbox {
+        width: 20px;
+        height: 20px;
+        border: 2px solid #667eea;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .preference-option.selected .preference-checkbox {
+        background: #667eea;
+        color: white;
+    }
+
+    .preference-option.selected .preference-checkbox::after {
+        content: '✓';
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .preference-label {
+        font-weight: 500;
+        color: #333;
+    }
+
+    /* Form Buttons */
+    .form-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 150px;
+        justify-content: center;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-secondary {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        border: 2px solid #667eea;
+    }
+
+    .btn-secondary:hover {
+        background: #667eea;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+        color: white;
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(86, 171, 47, 0.3);
+    }
+
+    /* Validation Messages */
+    .validation-message {
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .validation-error {
+        color: #ff416c;
+    }
+
+    .validation-success {
+        color: #56ab2f;
+    }
+
+    /* Success Animation */
+    .success-animation {
+        text-align: center;
+        padding: 3rem;
+        display: none;
+    }
+
+    .success-animation.show {
+        display: block;
+        animation: bounceIn 0.8s ease-out;
+    }
+
+    .success-animation i {
+        font-size: 5rem;
+        color: #56ab2f;
+        margin-bottom: 2rem;
+        animation: pulse 1s infinite;
+    }
+
+    .success-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 1rem;
+    }
+
+    .success-message {
+        font-size: 1.1rem;
+        color: #666;
+        margin-bottom: 2rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .form-container {
+            margin: 1rem;
+            padding: 2rem;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .form-buttons {
+            flex-direction: column;
+        }
+
+        .room-selection {
+            grid-template-columns: 1fr;
+        }
+
+        .student-details {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .preference-options {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Loading States */
+    .loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @keyframes bounceIn {
+        0% {
+            opacity: 0;
+            transform: scale(0.3);
+        }
+        50% {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+        70% {
+            transform: scale(0.9);
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="allocation-container">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-user-plus"></i> Hostel Room Allocation
+            </h1>
+            <p class="page-subtitle">Allocate hostel rooms to students with smart matching</p>
+        </div>
+
+        <!-- Form Container -->
+        <div class="form-container">
+            <form method="POST" action="{{ url_for('allocate_hostel') }}" id="allocationForm">
+                <!-- Student Selection Section -->
+                <div class="form-section active" id="section1">
+                    <h3 class="section-title">
+                        <i class="fas fa-user"></i> Student Selection
+                    </h3>
+                    <div class="form-group">
+                        <label class="form-label required">Select Student</label>
+                        <div class="input-group">
+                            <i class="fas fa-user-graduate"></i>
+                            <select name="student_id" id="studentSelect" class="form-control" required>
+                                <option value="">Choose a student...</option>
+                                {% for student in students %}
+                                <option value="{{ student.student_id }}">{{ student.student_id }} - {{ student.name }} ({{ student.course }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="validation-message" id="studentValidation"></div>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="button" class="btn btn-secondary" onclick="goBack()">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="loadStudentInfo()" id="loadStudentBtn">
+                            <i class="fas fa-search"></i> Load Student Info
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Student Info Display -->
+                <div class="student-info" id="studentInfo">
+                    <div class="student-avatar" id="studentAvatar">S</div>
+                    <div class="student-details">
+                        <div class="student-detail">
+                            <div class="student-detail-label">Student ID</div>
+                            <div class="student-detail-value" id="studentId">-</div>
+                        </div>
+                        <div class="student-detail">
+                            <div class="student-detail-label">Name</div>
+                            <div class="student-detail-value" id="studentName">-</div>
+                        </div>
+                        <div class="student-detail">
+                            <div class="student-detail-label">Course</div>
+                            <div class="student-detail-value" id="studentCourse">-</div>
+                        </div>
+                        <div class="student-detail">
+                            <div class="student-detail-label">Year</div>
+                            <div class="student-detail-value" id="studentYear">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Room Selection Section -->
+                <div class="form-section" id="section2">
+                    <h3 class="section-title">
+                        <i class="fas fa-bed"></i> Available Rooms
+                    </h3>
+                    
+                    <div class="room-selection" id="roomSelection">
+                        {% for room in rooms %}
+                        {% if room.occupied < room.capacity %}
+                        <div class="room-option" data-room="{{ room.room_number }}" onclick="selectRoom('{{ room.room_number }}')">
+                            <div class="room-header">
+                                <div class="room-number">Room {{ room.room_number }}</div>
+                                <div class="room-status available">Available</div>
+                            </div>
+                            
+                            <div class="room-details">
+                                <div class="room-detail">
+                                    <div class="room-detail-label">Floor</div>
+                                    <div class="room-detail-value">{{ room.floor }}</div>
+                                </div>
+                                <div class="room-detail">
+                                    <div class="room-detail-label">Capacity</div>
+                                    <div class="room-detail-value">{{ room.capacity }}</div>
+                                </div>
+                                <div class="room-detail">
+                                    <div class="room-detail-label">Occupied</div>
+                                    <div class="room-detail-value">{{ room.occupied }}</div>
+                                </div>
+                                <div class="room-detail">
+                                    <div class="room-detail-label">Available</div>
+                                    <div class="room-detail-value">{{ room.capacity - room.occupied }}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="room-occupancy">
+                                <span class="occupancy-text">{{ room.occupied }}/{{ room.capacity }}</span>
+                                <div class="occupancy-bar">
+                                    <div class="occupancy-fill" style="width: {{ (room.occupied / room.capacity * 100) if room.capacity > 0 else 0 }}%;"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="room-features">
+                                <span class="feature-tag">AC</span>
+                                <span class="feature-tag">WiFi</span>
+                                <span class="feature-tag">Study Table</span>
+                                <span class="feature-tag">Wardrobe</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <input type="hidden" name="room_number" id="selectedRoom" required>
+
+                    <div class="form-buttons">
+                        <button type="button" class="btn btn-secondary" onclick="goToStep(1)">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="validateRoomSelection()" id="validateRoomBtn" disabled>
+                            <i class="fas fa-arrow-right"></i> Continue
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Preferences Section -->
+                <div class="form-section" id="section3">
+                    <h3 class="section-title">
+                        <i class="fas fa-heart"></i> Roommate Preferences
+                    </h3>
+                    
+                    <div class="preferences-section">
+                        <div class="preferences-title">Select your preferences for roommate matching:</div>
+                        <div class="preference-options">
+                            <div class="preference-option" onclick="togglePreference(this, 'same_course')">
+                                <div class="preference-checkbox"></div>
+                                <div class="preference-label">Same Course</div>
+                            </div>
+                            <div class="preference-option" onclick="togglePreference(this, 'same_year')">
+                                <div class="preference-checkbox"></div>
+                                <div class="preference-label">Same Year</div>
+                            </div>
+                            <div class="preference-option" onclick="togglePreference(this, 'quiet_study')">
+                                <div class="preference-checkbox"></div>
+                                <div class="preference-label">Quiet Study Environment</div>
+                            </div>
+                            <div class="preference-option" onclick="togglePreference(this, 'social')">
+                                <div class="preference-checkbox"></div>
+                                <div class="preference-label">Social & Outgoing</div>
+                            </div>
+                            <div class="preference-option" onclick="togglePreference(this, 'early_bird')">
+                                <div class="preference-checkbox"></div>
+                                <div class="preference-label">Early Bird</div>
+                            </div>
+                            <div class="preference-option" onclick="togglePreference(this, 'night_owl')">
+                                <div class="preference-checkbox"></div>
+                                <div class="preference-checkbox"></div>
+                                <div class="preference-label">Night Owl</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="button" class="btn btn-secondary" onclick="goToStep(2)">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="validatePreferences()" id="validatePreferencesBtn">
+                            <i class="fas fa-arrow-right"></i> Continue
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Confirmation Section -->
+                <div class="form-section" id="section4">
+                    <h3 class="section-title">
+                        <i class="fas fa-check-circle"></i> Allocation Confirmation
+                    </h3>
+                    
+                    <div class="allocation-summary">
+                        <div style="background: rgba(255, 255, 255, 0.9); border-radius: 12px; padding: 2rem; margin-bottom: 2rem;">
+                            <h4 style="margin-bottom: 1.5rem; color: #333; font-weight: 700; text-align: center;">Allocation Summary</h4>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+                                <div style="padding: 1rem; background: rgba(102, 126, 234, 0.05); border-radius: 8px; border-left: 4px solid #667eea;">
+                                    <div style="font-weight: 600; color: #666; font-size: 0.8rem; margin-bottom: 0.25rem;">Student</div>
+                                    <div style="font-weight: 700; color: #333; font-size: 1.1rem;" id="summaryStudent">-</div>
+                                </div>
+                                <div style="padding: 1rem; background: rgba(102, 126, 234, 0.05); border-radius: 8px; border-left: 4px solid #667eea;">
+                                    <div style="font-weight: 600; color: #666; font-size: 0.8rem; margin-bottom: 0.25rem;">Room</div>
+                                    <div style="font-weight: 700; color: #333; font-size: 1.1rem;" id="summaryRoom">-</div>
+                                </div>
+                                <div style="padding: 1rem; background: rgba(102, 126, 234, 0.05); border-radius: 8px; border-left: 4px solid #667eea;">
+                                    <div style="font-weight: 600; color: #666; font-size: 0.8rem; margin-bottom: 0.25rem;">Floor</div>
+                                    <div style="font-weight: 700; color: #333; font-size: 1.1rem;" id="summaryFloor">-</div>
+                                </div>
+                                <div style="padding: 1rem; background: rgba(102, 126, 234, 0.05); border-radius: 8px; border-left: 4px solid #667eea;">
+                                    <div style="font-weight: 600; color: #666; font-size: 0.8rem; margin-bottom: 0.25rem;">Allocation Date</div>
+                                    <div style="font-weight: 700; color: #333; font-size: 1.1rem;" id="summaryDate">-</div>
+                                </div>
+                            </div>
+
+                            <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 2rem; border-radius: 12px; text-align: center;">
+                                <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.5rem;">Room Allocation</div>
+                                <div style="font-size: 2rem; font-weight: 800;" id="summaryStatus">Confirmed</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="button" class="btn btn-secondary" onclick="goToStep(3)">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <button type="submit" class="btn btn-success" id="confirmAllocationBtn">
+                            <i class="fas fa-check"></i> Confirm Allocation
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Success Animation -->
+                <div class="success-animation" id="successAnimation">
+                    <i class="fas fa-check-circle"></i>
+                    <div class="success-title">Room Allocated Successfully!</div>
+                    <div class="success-message">
+                        The student has been successfully allocated to the selected room. 
+                        Notification has been sent to the student.
+                    </div>
+                    <a href="{{ url_for('hostel') }}" class="btn btn-primary">
+                        <i class="fas fa-bed"></i> View Hostel Status
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentStep = 1;
+    let selectedStudent = null;
+    let selectedRoom = null;
+    let selectedPreferences = [];
+
+    // Step navigation
+    function goToStep(step) {
+        // Hide all sections
+        document.querySelectorAll('.form-section').forEach(section => {
+            section.classList.remove('active');
+        });
+
+        // Show target section
+        document.getElementById(`section${step}`).classList.add('active');
+        currentStep = step;
+    }
+
+    // Load student info
+    function loadStudentInfo() {
+        const studentSelect = document.getElementById('studentSelect');
+        const selectedOption = studentSelect.options[studentSelect.selectedIndex];
+        
+        if (!selectedOption.value) {
+            document.getElementById('studentValidation').textContent = 'Please select a student';
+            document.getElementById('studentValidation').className = 'validation-message validation-error';
+            return;
+        }
+
+        // Parse student info from option text
+        const optionText = selectedOption.text;
+        const studentId = selectedOption.value;
+        const name = optionText.split(' - ')[1].split(' (')[0];
+        const course = optionText.split(' (')[1].replace(')', '');
+
+        selectedStudent = {
+            id: studentId,
+            name: name,
+            course: course,
+            year: '2' // Default year, in real app this would come from database
+        };
+
+        // Display student info
+        document.getElementById('studentId').textContent = studentId;
+        document.getElementById('studentName').textContent = name;
+        document.getElementById('studentCourse').textContent = course;
+        document.getElementById('studentYear').textContent = `Year ${selectedStudent.year}`;
+        document.getElementById('studentAvatar').textContent = name[0].toUpperCase();
+        
+        document.getElementById('studentInfo').classList.add('show');
+        document.getElementById('studentValidation').textContent = '✓ Student selected';
+        document.getElementById('studentValidation').className = 'validation-message validation-success';
+        
+        setTimeout(() => {
+            goToStep(2);
+        }, 1000);
+    }
+
+    // Room selection
+    function selectRoom(roomNumber) {
+        // Remove selection from all rooms
+        document.querySelectorAll('.room-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+
+        // Add selection to clicked room
+        event.target.closest('.room-option').classList.add('selected');
+        
+        selectedRoom = roomNumber;
+        document.getElementById('selectedRoom').value = roomNumber;
+        document.getElementById('validateRoomBtn').disabled = false;
+        
+        // Add animation
+        event.target.closest('.room-option').style.animation = 'pulse 0.5s ease-out';
+    }
+
+    function validateRoomSelection() {
+        if (!selectedRoom) {
+            alert('Please select a room');
+            return;
+        }
+        
+        goToStep(3);
+    }
+
+    // Preferences
+    function togglePreference(element, preference) {
+        element.classList.toggle('selected');
+        
+        if (element.classList.contains('selected')) {
+            if (!selectedPreferences.includes(preference)) {
+                selectedPreferences.push(preference);
+            }
+        } else {
+            selectedPreferences = selectedPreferences.filter(p => p !== preference);
+        }
+    }
+
+    function validatePreferences() {
+        goToStep(4);
+        updateSummary();
+    }
+
+    // Update summary
+    function updateSummary() {
+        if (selectedStudent && selectedRoom) {
+            document.getElementById('summaryStudent').textContent = `${selectedStudent.name} (${selectedStudent.id})`;
+            document.getElementById('summaryRoom').textContent = `Room ${selectedRoom}`;
+            document.getElementById('summaryFloor').textContent = `Floor ${Math.floor(parseInt(selectedRoom) / 100)}`;
+            document.getElementById('summaryDate').textContent = new Date().toLocaleDateString();
+        }
+    }
+
+    // Form submission
+    document.getElementById('allocationForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const submitBtn = document.getElementById('confirmAllocationBtn');
+        submitBtn.innerHTML = '<span class="spinner"></span> Processing...';
+        submitBtn.disabled = true;
+
+        // Simulate allocation processing
+        setTimeout(() => {
+            document.querySelector('.form-container').style.display = 'none';
+            document.getElementById('successAnimation').classList.add('show');
+        }, 2000);
+    });
+
+    // Go back function
+    function goBack() {
+        window.history.back();
+    }
+
+    // Real-time validation
+    document.addEventListener('DOMContentLoaded', function() {
+        // Student selection validation
+        document.getElementById('studentSelect').addEventListener('change', function() {
+            if (this.value) {
+                this.classList.add('valid');
+                this.classList.remove('invalid');
+            }
+        });
+
+        // Add animations to room options
+        document.querySelectorAll('.room-option').forEach(option => {
+            option.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px) scale(1.02)';
+            });
+            
+            option.addEventListener('mouseleave', function() {
+                if (!this.classList.contains('selected')) {
+                    this.style.transform = 'translateY(0) scale(1)';
+                }
+            });
+        });
+    });
+
+    // Add animations
+    document.addEventListener('DOMContentLoaded', function() {
+        const sections = document.querySelectorAll('.form-section');
+        sections.forEach((section, index) => {
+            section.style.animationDelay = `${index * 0.2}s`;
+            section.classList.add('animate-fadeInUp');
+        });
+
+        // Animate room options
+        const roomOptions = document.querySelectorAll('.room-option');
+        roomOptions.forEach((option, index) => {
+            option.style.animationDelay = `${index * 0.1}s`;
+            option.classList.add('animate-fadeInUp');
+        });
+    });
+
+    // Auto-refresh available rooms
+    function refreshRooms() {
+        // In a real application, this would fetch updated room data
+        console.log('Refreshing room availability...');
+    }
+
+    // Refresh rooms every 30 seconds
+    setInterval(refreshRooms, 30000);
+</script>
+{% endblock %}

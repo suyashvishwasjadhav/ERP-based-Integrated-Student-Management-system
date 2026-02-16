@@ -1,0 +1,579 @@
+{% extends "base_admin_sidebar.html" %}
+
+{% block title %}Create Test - College ERP{% endblock %}
+
+{% block extra_css %}
+<style>
+    .create-test-container {
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding: 2rem;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: white;
+        margin-bottom: 1rem;
+    }
+
+    .page-subtitle {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1.2rem;
+    }
+
+    .form-container {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        margin-bottom: 2rem;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-label {
+        color: white;
+        font-weight: 500;
+        font-size: 1rem;
+    }
+
+    .form-input,
+    .form-textarea,
+    .form-select {
+        padding: 0.75rem 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        backdrop-filter: blur(10px);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-input:focus,
+    .form-textarea:focus,
+    .form-select:focus {
+        outline: none;
+        border-color: #56ab2f;
+        background: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 0 0 3px rgba(86, 171, 47, 0.2);
+    }
+
+    .form-input::placeholder,
+    .form-textarea::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .form-textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .questions-container {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .question-item {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        position: relative;
+    }
+
+    .question-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .question-number {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+
+    .question-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .action-btn {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #e74c3c, #f39c12);
+        color: white;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+        color: white;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .question-content {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .question-text-group {
+        grid-column: 1 / -1;
+    }
+
+    .question-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .option-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .option-label {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .add-question-btn {
+        width: 100%;
+        padding: 1rem;
+        border: 2px dashed rgba(255, 255, 255, 0.3);
+        border-radius: 15px;
+        background: rgba(255, 255, 255, 0.05);
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1.1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .add-question-btn:hover {
+        border-color: #56ab2f;
+        background: rgba(86, 171, 47, 0.1);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .submit-btn {
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 15px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+        color: white;
+    }
+
+    .btn-preview {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .question-type-select {
+        grid-column: 1 / -1;
+    }
+
+    .points-input {
+        max-width: 100px;
+    }
+
+    .required-field::after {
+        content: ' *';
+        color: #e74c3c;
+    }
+
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .question-options {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .submit-btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="create-test-container">
+    <div class="page-header">
+        <h1 class="page-title">Create New Test</h1>
+        <p class="page-subtitle">Design and configure a test for your students</p>
+    </div>
+
+    <form method="POST" class="form-container">
+        <div class="form-section">
+            <h3 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Test Information
+            </h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label required-field">Test Title</label>
+                    <input type="text" name="title" class="form-input" placeholder="Enter test title" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Test Code</label>
+                    <input type="text" name="test_code" class="form-input" placeholder="e.g., MATH101-QUIZ1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label required-field">Duration (minutes)</label>
+                    <input type="number" name="duration_minutes" class="form-input" placeholder="60" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Max Attempts</label>
+                    <input type="number" name="max_attempts" class="form-input" placeholder="3" min="1" value="3">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea name="description" class="form-textarea" placeholder="Enter test description and instructions"></textarea>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 class="section-title">
+                <i class="fas fa-calendar-alt"></i>
+                Schedule
+            </h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label required-field">Start Time</label>
+                    <input type="datetime-local" name="start_time" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label required-field">End Time</label>
+                    <input type="datetime-local" name="end_time" class="form-input" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 class="section-title">
+                <i class="fas fa-question-circle"></i>
+                Questions
+            </h3>
+            <div class="questions-container" id="questionsContainer">
+                <!-- Questions will be added dynamically -->
+            </div>
+            <button type="button" class="add-question-btn" onclick="addQuestion()">
+                <i class="fas fa-plus"></i>
+                Add Question
+            </button>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="submit-btn btn-preview" onclick="previewTest()">
+                <i class="fas fa-eye"></i>
+                Preview Test
+            </button>
+            <button type="submit" class="submit-btn btn-save">
+                <i class="fas fa-save"></i>
+                Create Test
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let questionCount = 0;
+
+    function addQuestion() {
+        questionCount++;
+        const questionsContainer = document.getElementById('questionsContainer');
+        
+        const questionHTML = `
+            <div class="question-item" data-question="${questionCount}">
+                <div class="question-header">
+                    <span class="question-number">Question ${questionCount}</span>
+                    <div class="question-actions">
+                        <button type="button" class="action-btn btn-success" onclick="duplicateQuestion(${questionCount})">
+                            <i class="fas fa-copy"></i>
+                            Duplicate
+                        </button>
+                        <button type="button" class="action-btn btn-danger" onclick="removeQuestion(${questionCount})">
+                            <i class="fas fa-trash"></i>
+                            Remove
+                        </button>
+                    </div>
+                </div>
+                <div class="question-content">
+                    <div class="form-group question-text-group">
+                        <label class="form-label required-field">Question Text</label>
+                        <textarea name="question_text" class="form-textarea" placeholder="Enter your question here..." required></textarea>
+                    </div>
+                    <div class="form-group question-type-select">
+                        <label class="form-label required-field">Question Type</label>
+                        <select name="question_type" class="form-select" onchange="toggleQuestionOptions(${questionCount})" required>
+                            <option value="">Select question type</option>
+                            <option value="multiple_choice">Multiple Choice</option>
+                            <option value="true_false">True/False</option>
+                            <option value="short_answer">Short Answer</option>
+                            <option value="essay">Essay</option>
+                        </select>
+                    </div>
+                    <div class="question-options" id="options-${questionCount}">
+                        <!-- Options will be added based on question type -->
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label required-field">Correct Answer</label>
+                            <input type="text" name="correct_answer" class="form-input" placeholder="Enter correct answer" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required-field">Points</label>
+                            <input type="number" name="points" class="form-input points-input" placeholder="1" min="1" value="1" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        questionsContainer.insertAdjacentHTML('beforeend', questionHTML);
+        
+        // Add animation
+        const newQuestion = questionsContainer.lastElementChild;
+        newQuestion.style.opacity = '0';
+        newQuestion.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            newQuestion.style.transition = 'all 0.3s ease';
+            newQuestion.style.opacity = '1';
+            newQuestion.style.transform = 'translateY(0)';
+        }, 100);
+    }
+
+    function toggleQuestionOptions(questionNum) {
+        const questionType = document.querySelector(`[data-question="${questionNum}"] select[name="question_type"]`).value;
+        const optionsContainer = document.getElementById(`options-${questionNum}`);
+        
+        let optionsHTML = '';
+        
+        if (questionType === 'multiple_choice') {
+            optionsHTML = `
+                <div class="form-group">
+                    <label class="form-label">Option A</label>
+                    <input type="text" name="option_a" class="form-input" placeholder="Option A">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Option B</label>
+                    <input type="text" name="option_b" class="form-input" placeholder="Option B">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Option C</label>
+                    <input type="text" name="option_c" class="form-input" placeholder="Option C">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Option D</label>
+                    <input type="text" name="option_d" class="form-input" placeholder="Option D">
+                </div>
+            `;
+        } else if (questionType === 'true_false') {
+            optionsHTML = `
+                <div class="form-group">
+                    <label class="form-label">Options</label>
+                    <div style="display: flex; gap: 1rem;">
+                        <label style="color: white; display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="radio" name="tf_option_${questionNum}" value="True" style="margin: 0;">
+                            True
+                        </label>
+                        <label style="color: white; display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="radio" name="tf_option_${questionNum}" value="False" style="margin: 0;">
+                            False
+                        </label>
+                    </div>
+                </div>
+            `;
+        }
+        
+        optionsContainer.innerHTML = optionsHTML;
+    }
+
+    function removeQuestion(questionNum) {
+        const questionElement = document.querySelector(`[data-question="${questionNum}"]`);
+        if (questionElement) {
+            questionElement.style.transition = 'all 0.3s ease';
+            questionElement.style.opacity = '0';
+            questionElement.style.transform = 'translateX(-100%)';
+            setTimeout(() => {
+                questionElement.remove();
+                updateQuestionNumbers();
+            }, 300);
+        }
+    }
+
+    function duplicateQuestion(questionNum) {
+        const questionElement = document.querySelector(`[data-question="${questionNum}"]`);
+        if (questionElement) {
+            const clonedQuestion = questionElement.cloneNode(true);
+            questionCount++;
+            clonedQuestion.setAttribute('data-question', questionCount);
+            clonedQuestion.querySelector('.question-number').textContent = `Question ${questionCount}`;
+            
+            // Clear input values
+            clonedQuestion.querySelectorAll('input, textarea, select').forEach(input => {
+                if (input.type !== 'radio' && input.type !== 'checkbox') {
+                    input.value = '';
+                }
+            });
+            
+            questionElement.parentNode.insertBefore(clonedQuestion, questionElement.nextSibling);
+            
+            // Add animation
+            clonedQuestion.style.opacity = '0';
+            clonedQuestion.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                clonedQuestion.style.transition = 'all 0.3s ease';
+                clonedQuestion.style.opacity = '1';
+                clonedQuestion.style.transform = 'translateY(0)';
+            }, 100);
+        }
+    }
+
+    function updateQuestionNumbers() {
+        const questions = document.querySelectorAll('.question-item');
+        questions.forEach((question, index) => {
+            const questionNum = index + 1;
+            question.setAttribute('data-question', questionNum);
+            question.querySelector('.question-number').textContent = `Question ${questionNum}`;
+        });
+    }
+
+    function previewTest() {
+        // Collect form data
+        const formData = new FormData(document.querySelector('form'));
+        const testData = {};
+        
+        for (let [key, value] of formData.entries()) {
+            if (testData[key]) {
+                if (Array.isArray(testData[key])) {
+                    testData[key].push(value);
+                } else {
+                    testData[key] = [testData[key], value];
+                }
+            } else {
+                testData[key] = value;
+            }
+        }
+        
+        // Show preview (simplified)
+        alert('Test preview would show here. This is a demo implementation.');
+    }
+
+    // Initialize with one question
+    document.addEventListener('DOMContentLoaded', function() {
+        addQuestion();
+        
+        // Set default start time to now
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.querySelector('input[name="start_time"]').value = now.toISOString().slice(0, 16);
+        
+        // Set default end time to 1 hour from now
+        const endTime = new Date(now.getTime() + 60 * 60 * 1000);
+        document.querySelector('input[name="end_time"]').value = endTime.toISOString().slice(0, 16);
+    });
+</script>
+{% endblock %}

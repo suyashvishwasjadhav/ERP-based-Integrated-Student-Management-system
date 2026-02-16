@@ -1,0 +1,351 @@
+{% extends "base_student.html" %}
+
+{% block title %}Student Wallet - College ERP{% endblock %}
+
+{% block extra_css %}
+<style>
+    .wallet-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .wallet-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        text-align: center;
+    }
+
+    .wallet-balance {
+        font-size: 3rem;
+        font-weight: bold;
+        color: #56ab2f;
+        margin-bottom: 1rem;
+    }
+
+    .wallet-label {
+        font-size: 1.2rem;
+        opacity: 0.8;
+        margin-bottom: 2rem;
+    }
+
+    .add-money-form {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: white;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #56ab2f;
+        background: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 0 20px rgba(86, 171, 47, 0.3);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+        color: white;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 10px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(86, 171, 47, 0.3);
+    }
+
+    .transactions-section {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 1.5rem;
+        color: #a8e6cf;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .transaction-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        border-left: 4px solid #56ab2f;
+    }
+
+    .transaction-item.debit {
+        border-left-color: #ff6b6b;
+    }
+
+    .transaction-info {
+        flex: 1;
+    }
+
+    .transaction-description {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .transaction-date {
+        font-size: 0.9rem;
+        opacity: 0.7;
+    }
+
+    .transaction-amount {
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+
+    .transaction-amount.credit {
+        color: #56ab2f;
+    }
+
+    .transaction-amount.debit {
+        color: #ff6b6b;
+    }
+
+    .rewards-section {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .reward-item {
+        background: rgba(255, 193, 7, 0.2);
+        border: 1px solid #ffc107;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .reward-info {
+        flex: 1;
+    }
+
+    .reward-reason {
+        font-weight: 600;
+        color: #ffc107;
+        margin-bottom: 0.25rem;
+    }
+
+    .reward-date {
+        font-size: 0.9rem;
+        opacity: 0.7;
+    }
+
+    .reward-amount {
+        font-weight: bold;
+        color: #ffc107;
+        font-size: 1.2rem;
+    }
+
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .action-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-decoration: none;
+        color: white;
+    }
+
+    .action-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        border-color: rgba(86, 171, 47, 0.3);
+    }
+
+    .action-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: #56ab2f;
+    }
+
+    .action-title {
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+
+    .action-description {
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+
+    @media (max-width: 768px) {
+        .wallet-container {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wallet-container">
+    <div class="wallet-card">
+        <div class="wallet-balance">₹{{ wallet.balance }}</div>
+        <div class="wallet-label">Current Balance</div>
+        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <a href="/student/library" class="btn-primary" style="text-decoration: none; flex: 1; text-align: center;">
+                <i class="fas fa-book"></i> Browse Library
+            </a>
+            <a href="/payment_gateway" class="btn-primary" style="text-decoration: none; flex: 1; text-align: center;">
+                <i class="fas fa-plus"></i> Add Money
+            </a>
+        </div>
+    </div>
+
+    <div class="add-money-form">
+        <h3 class="section-title">
+            <i class="fas fa-credit-card"></i>
+            Add Money to Wallet
+        </h3>
+        <form method="POST" action="/student/wallet/add-money">
+            <div class="form-group">
+                <label class="form-label">Amount (₹)</label>
+                <input type="number" class="form-input" name="amount" placeholder="Enter amount" min="100" step="100" required>
+            </div>
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-plus"></i> Add Money
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="quick-actions">
+    <a href="/student/library" class="action-card">
+        <div class="action-icon">
+            <i class="fas fa-book"></i>
+        </div>
+        <div class="action-title">Digital Library</div>
+        <div class="action-description">Browse and purchase books</div>
+    </a>
+    <a href="/payment_gateway" class="action-card">
+        <div class="action-icon">
+            <i class="fas fa-credit-card"></i>
+        </div>
+        <div class="action-title">Payment Gateway</div>
+        <div class="action-description">Secure payment processing</div>
+    </a>
+    <a href="/student/fees" class="action-card">
+        <div class="action-icon">
+            <i class="fas fa-graduation-cap"></i>
+        </div>
+        <div class="action-title">Pay Fees</div>
+        <div class="action-description">Get 5% cashback on timely payments</div>
+    </a>
+    <a href="/student/chatbot" class="action-card">
+        <div class="action-icon">
+            <i class="fas fa-robot"></i>
+        </div>
+        <div class="action-title">AI Assistant</div>
+        <div class="action-description">Get help with wallet and payments</div>
+    </a>
+</div>
+
+<div class="transactions-section">
+    <h3 class="section-title">
+        <i class="fas fa-history"></i>
+        Recent Transactions
+    </h3>
+    {% if transactions %}
+        {% for transaction in transactions %}
+        <div class="transaction-item {{ transaction.transaction_type }}">
+            <div class="transaction-info">
+                <div class="transaction-description">{{ transaction.description }}</div>
+                <div class="transaction-date">{{ transaction.created_at.strftime('%d %b %Y, %I:%M %p') }}</div>
+            </div>
+            <div class="transaction-amount {{ transaction.transaction_type }}">
+                {{ '+' if transaction.transaction_type == 'credit' else '-' }}₹{{ transaction.amount }}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div style="text-align: center; padding: 2rem; opacity: 0.7;">
+            <i class="fas fa-receipt" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+            <p>No transactions yet</p>
+        </div>
+    {% endif %}
+</div>
+
+<div class="rewards-section">
+    <h3 class="section-title">
+        <i class="fas fa-gift"></i>
+        Available Rewards
+    </h3>
+    {% if rewards %}
+        {% for reward in rewards %}
+        <div class="reward-item">
+            <div class="reward-info">
+                <div class="reward-reason">{{ reward.reason }}</div>
+                <div class="reward-date">{{ reward.created_at.strftime('%d %b %Y') }}</div>
+            </div>
+            <div class="reward-amount">₹{{ reward.amount }}</div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div style="text-align: center; padding: 2rem; opacity: 0.7;">
+            <i class="fas fa-gift" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+            <p>No rewards yet. Pay fees on time to earn cashback!</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

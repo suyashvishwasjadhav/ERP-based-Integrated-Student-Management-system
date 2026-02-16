@@ -1,0 +1,985 @@
+{% extends "base.html" %}
+
+{% block title %}Examination Records - College ERP System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .exams-container {
+        padding: 2rem 0;
+        min-height: calc(100vh - 80px);
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        animation: fadeInDown 1s ease-out;
+    }
+
+    .page-title {
+        font-size: 3rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+    }
+
+    .page-subtitle {
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 400;
+    }
+
+    /* Exam Stats */
+    .exam-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0.1s; }
+    .stat-card:nth-child(2) { animation-delay: 0.2s; }
+    .stat-card:nth-child(3) { animation-delay: 0.3s; }
+    .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+    .stat-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: pulse 2s infinite;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #333;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .stat-label {
+        color: #666;
+        font-weight: 600;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Exam Management Tabs */
+    .exam-tabs {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 3rem;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideInUp 0.8s ease-out;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .management-tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .management-tab {
+        padding: 1rem 2rem;
+        border: none;
+        background: none;
+        color: #666;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-bottom: 3px solid transparent;
+    }
+
+    .management-tab.active {
+        color: #667eea;
+        border-bottom-color: #667eea;
+    }
+
+    .management-tab:hover {
+        color: #667eea;
+    }
+
+    .management-content {
+        display: none;
+    }
+
+    .management-content.active {
+        display: block;
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    /* Exams Table */
+    .exams-table-container {
+        overflow-x: auto;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .exams-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .exams-table th {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        font-weight: 600;
+        padding: 1.5rem 1rem;
+        text-align: left;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .exams-table td {
+        padding: 1.5rem 1rem;
+        border-bottom: 1px solid #f0f0f0;
+        vertical-align: middle;
+    }
+
+    .exams-table tr {
+        transition: all 0.3s ease;
+    }
+
+    .exams-table tr:hover {
+        background: rgba(102, 126, 234, 0.05);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .exams-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Student ID Badge */
+    .student-id {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        display: inline-block;
+    }
+
+    /* Grade Display */
+    .grade-display {
+        font-weight: 700;
+        font-size: 1.2rem;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        display: inline-block;
+    }
+
+    .grade-excellent {
+        background: rgba(86, 171, 47, 0.1);
+        color: #56ab2f;
+        border: 2px solid rgba(86, 171, 47, 0.2);
+    }
+
+    .grade-good {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        border: 2px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .grade-average {
+        background: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+        border: 2px solid rgba(255, 193, 7, 0.2);
+    }
+
+    .grade-poor {
+        background: rgba(255, 65, 108, 0.1);
+        color: #ff416c;
+        border: 2px solid rgba(255, 65, 108, 0.2);
+    }
+
+    /* Subject Badge */
+    .subject-badge {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    /* Exam Date */
+    .exam-date {
+        color: #666;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-view {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        border: 1px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .btn-view:hover {
+        background: #667eea;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-edit {
+        background: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+        border: 1px solid rgba(255, 193, 7, 0.2);
+    }
+
+    .btn-edit:hover {
+        background: #ffc107;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-delete {
+        background: rgba(255, 65, 108, 0.1);
+        color: #ff416c;
+        border: 1px solid rgba(255, 65, 108, 0.2);
+    }
+
+    .btn-delete:hover {
+        background: #ff416c;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    /* Performance Chart */
+    .performance-chart {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 2px solid #e9ecef;
+    }
+
+    .chart-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .chart-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+
+    .chart-subtitle {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .performance-bars {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .performance-item {
+        text-align: center;
+    }
+
+    .performance-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+
+    .performance-bar-container {
+        width: 100%;
+        height: 12px;
+        background: rgba(102, 126, 234, 0.1);
+        border-radius: 6px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+    }
+
+    .performance-bar {
+        height: 100%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 6px;
+        transition: width 2s ease-out;
+        position: relative;
+    }
+
+    .performance-bar::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        animation: shimmer 2s infinite;
+    }
+
+    .performance-value {
+        font-weight: 700;
+        color: #667eea;
+        font-size: 0.9rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .exam-stats {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .management-tabs {
+            flex-wrap: wrap;
+        }
+
+        .exams-table-container {
+            font-size: 0.8rem;
+        }
+
+        .exams-table th,
+        .exams-table td {
+            padding: 1rem 0.5rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .performance-bars {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #666;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        color: #ccc;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: #333;
+    }
+
+    .empty-state p {
+        font-size: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    /* Loading States */
+    .loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="exams-container">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-file-alt"></i> Examination Records
+            </h1>
+            <p class="page-subtitle">Manage student examination records and performance analytics</p>
+        </div>
+
+        <!-- Exam Stats -->
+        <div class="exam-stats">
+            <div class="stat-card animate-fadeInUp">
+                <div class="stat-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <div class="stat-number">{{ exams|length }}</div>
+                <div class="stat-label">Total Exams</div>
+            </div>
+
+            <div class="stat-card animate-fadeInUp">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-number">{{ exams|map(attribute='student_id')|unique|list|length }}</div>
+                <div class="stat-label">Students Assessed</div>
+            </div>
+
+            <div class="stat-card animate-fadeInUp">
+                <div class="stat-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-number">{{ "%.1f"|format(exams|selectattr('marks')|map(attribute='marks')|list|sum / (exams|selectattr('marks')|list|length or 1)) }}</div>
+                <div class="stat-label">Average Score</div>
+            </div>
+
+            <div class="stat-card animate-fadeInUp">
+                <div class="stat-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div class="stat-number">{{ exams|selectattr('grade', 'equalto', 'A')|list|length }}</div>
+                <div class="stat-label">Grade A's</div>
+            </div>
+        </div>
+
+        <!-- Exam Management -->
+        <div class="exam-tabs">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-clipboard-list"></i> Exam Management
+                </h2>
+                <button class="btn btn-primary" onclick="showAddExamModal()">
+                    <i class="fas fa-plus"></i> Add Exam Record
+                </button>
+            </div>
+
+            <div class="management-tabs">
+                <button class="management-tab active" onclick="showExamTab('records')">Exam Records</button>
+                <button class="management-tab" onclick="showExamTab('performance')">Performance Analytics</button>
+                <button class="management-tab" onclick="showExamTab('reports')">Grade Reports</button>
+                <button class="management-tab" onclick="showExamTab('schedule')">Exam Schedule</button>
+            </div>
+
+            <!-- Exam Records Tab -->
+            <div class="management-content active" id="recordsTab">
+                {% if exams %}
+                <div class="exams-table-container">
+                    <table class="exams-table">
+                        <thead>
+                            <tr>
+                                <th>Student ID</th>
+                                <th>Subject</th>
+                                <th>Exam Date</th>
+                                <th>Marks</th>
+                                <th>Grade</th>
+                                <th>Semester</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for exam in exams %}
+                            <tr>
+                                <td>
+                                    <span class="student-id">{{ exam.student_id }}</span>
+                                </td>
+                                <td>
+                                    <span class="subject-badge">{{ exam.subject }}</span>
+                                </td>
+                                <td>
+                                    <div class="exam-date">
+                                        <i class="fas fa-calendar"></i>
+                                        {{ exam.exam_date.strftime('%b %d, %Y') }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span style="font-weight: 700; color: #333;">{{ exam.marks or 'N/A' }}</span>
+                                </td>
+                                <td>
+                                    {% if exam.grade %}
+                                    <span class="grade-display 
+                                        {% if exam.grade in ['A', 'A+'] %}grade-excellent
+                                        {% elif exam.grade in ['B', 'B+'] %}grade-good
+                                        {% elif exam.grade in ['C', 'C+'] %}grade-average
+                                        {% else %}grade-poor{% endif %}">
+                                        {{ exam.grade }}
+                                    </span>
+                                    {% else %}
+                                    <span style="color: #666; font-style: italic;">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span style="background: rgba(255, 193, 7, 0.1); color: #ffc107; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">
+                                        Sem {{ exam.semester }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn-sm btn-view" onclick="viewExamDetails('{{ exam.id }}')" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn-sm btn-edit" onclick="editExamRecord('{{ exam.id }}')" title="Edit Record">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn-sm btn-delete" onclick="deleteExamRecord('{{ exam.id }}')" title="Delete Record">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-file-alt"></i>
+                    <h3>No Exam Records Found</h3>
+                    <p>Start by adding examination records for students.</p>
+                    <button class="btn btn-primary" onclick="showAddExamModal()">
+                        <i class="fas fa-plus"></i> Add First Exam Record
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Performance Analytics Tab -->
+            <div class="management-content" id="performanceTab">
+                <div class="performance-chart">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Subject-wise Performance</h3>
+                        <p class="chart-subtitle">Average marks across different subjects</p>
+                    </div>
+                    <div class="performance-bars">
+                        <div class="performance-item">
+                            <div class="performance-label">Mathematics</div>
+                            <div class="performance-bar-container">
+                                <div class="performance-bar" style="width: 85%;"></div>
+                            </div>
+                            <div class="performance-value">85%</div>
+                        </div>
+                        <div class="performance-item">
+                            <div class="performance-label">Physics</div>
+                            <div class="performance-bar-container">
+                                <div class="performance-bar" style="width: 78%;"></div>
+                            </div>
+                            <div class="performance-value">78%</div>
+                        </div>
+                        <div class="performance-item">
+                            <div class="performance-label">Chemistry</div>
+                            <div class="performance-bar-container">
+                                <div class="performance-bar" style="width: 82%;"></div>
+                            </div>
+                            <div class="performance-value">82%</div>
+                        </div>
+                        <div class="performance-item">
+                            <div class="performance-label">Computer Science</div>
+                            <div class="performance-bar-container">
+                                <div class="performance-bar" style="width: 90%;"></div>
+                            </div>
+                            <div class="performance-value">90%</div>
+                        </div>
+                        <div class="performance-item">
+                            <div class="performance-label">English</div>
+                            <div class="performance-bar-container">
+                                <div class="performance-bar" style="width: 75%;"></div>
+                            </div>
+                            <div class="performance-value">75%</div>
+                        </div>
+                        <div class="performance-item">
+                            <div class="performance-label">Electronics</div>
+                            <div class="performance-bar-container">
+                                <div class="performance-bar" style="width: 88%;"></div>
+                            </div>
+                            <div class="performance-value">88%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="performance-chart">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Grade Distribution</h3>
+                        <p class="chart-subtitle">Distribution of grades across all exams</p>
+                    </div>
+                    <div class="performance-bars">
+                        <div class="performance-item">
+                            <div class="performance-label">Grade A+</div>
+                            <div class="performance-bar-container">
+                                <div class="performance-bar" style="width: 15%; background: linear-gradient(135deg, #56ab2f, #a8e6cf);"></div>
+                            </div>
+                            <div class="performance-value">15%</div>
+                        </div>
+                        <div class="performance-item">
+                            <div class="performance-label">Grade A</div>
+                            <div class="performance-bar-container">
+                                <div class="performance-bar" style="width: 25%; background: linear-gradient(135deg, #56ab2f, #a8e6cf);"></div>
+                            </div>
+                            <div class="performance-value">25%</div>
+                        </div>
+                        <div class="performance-item">
+                            <div class="performance-label">Grade B</div>
+                            <div class="performance-bar-container">
+                                <div class="performance-bar" style="width: 30%; background: linear-gradient(135deg, #667eea, #764ba2);"></div>
+                            </div>
+                            <div class="performance-value">30%</div>
+                        </div>
+                        <div class="performance-item">
+                            <div class="performance-label">Grade C</div>
+                            <div class="performance-bar-container">
+                                <div class="performance-bar" style="width: 20%; background: linear-gradient(135deg, #ffc107, #ff9800);"></div>
+                            </div>
+                            <div class="performance-value">20%</div>
+                        </div>
+                        <div class="performance-item">
+                            <div class="performance-label">Grade D</div>
+                            <div class="performance-bar-container">
+                                <div class="performance-bar" style="width: 8%; background: linear-gradient(135deg, #ff416c, #ff4b2b);"></div>
+                            </div>
+                            <div class="performance-value">8%</div>
+                        </div>
+                        <div class="performance-item">
+                            <div class="performance-label">Grade F</div>
+                            <div class="performance-bar-container">
+                                <div class="performance-bar" style="width: 2%; background: linear-gradient(135deg, #ff416c, #ff4b2b);"></div>
+                            </div>
+                            <div class="performance-value">2%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grade Reports Tab -->
+            <div class="management-content" id="reportsTab">
+                <div class="empty-state">
+                    <i class="fas fa-file-pdf"></i>
+                    <h3>Grade Reports</h3>
+                    <p>Generate and download grade reports for students and classes.</p>
+                    <button class="btn btn-primary">
+                        <i class="fas fa-download"></i> Generate Reports
+                    </button>
+                </div>
+            </div>
+
+            <!-- Exam Schedule Tab -->
+            <div class="management-content" id="scheduleTab">
+                <div class="empty-state">
+                    <i class="fas fa-calendar-alt"></i>
+                    <h3>Exam Schedule</h3>
+                    <p>View and manage upcoming examination schedules.</p>
+                    <a href="{{ url_for('timetable') }}" class="btn btn-primary">
+                        <i class="fas fa-clock"></i> View Timetable
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Exam Modal -->
+<div id="addExamModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5);">
+    <div class="modal-content" style="background: white; margin: 5% auto; padding: 2rem; border-radius: 20px; width: 90%; max-width: 600px; position: relative; animation: slideInDown 0.3s ease-out;">
+        <span class="close" onclick="closeAddExamModal()" style="position: absolute; right: 1rem; top: 1rem; font-size: 2rem; cursor: pointer; color: #666;">&times;</span>
+        <div id="addExamModalContent">
+            <h2 style="color: #333; margin-bottom: 1.5rem;">Add Exam Record</h2>
+            <form id="addExamForm">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Student ID</label>
+                        <input type="text" name="student_id" class="form-control" placeholder="Enter student ID" required>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Subject</label>
+                        <select name="subject" class="form-control" required>
+                            <option value="">Select Subject</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Physics">Physics</option>
+                            <option value="Chemistry">Chemistry</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="English">English</option>
+                            <option value="Electronics">Electronics</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Exam Date</label>
+                        <input type="date" name="exam_date" class="form-control" required>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Semester</label>
+                        <select name="semester" class="form-control" required>
+                            <option value="">Select Semester</option>
+                            <option value="1">Semester 1</option>
+                            <option value="2">Semester 2</option>
+                            <option value="3">Semester 3</option>
+                            <option value="4">Semester 4</option>
+                            <option value="5">Semester 5</option>
+                            <option value="6">Semester 6</option>
+                            <option value="7">Semester 7</option>
+                            <option value="8">Semester 8</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Marks</label>
+                        <input type="number" name="marks" class="form-control" placeholder="Enter marks" min="0" max="100">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Grade</label>
+                        <select name="grade" class="form-control">
+                            <option value="">Select Grade</option>
+                            <option value="A+">A+</option>
+                            <option value="A">A</option>
+                            <option value="B+">B+</option>
+                            <option value="B">B</option>
+                            <option value="C+">C+</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                            <option value="F">F</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="text-align: center;">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Exam Record
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Tab navigation
+    function showExamTab(tabName) {
+        // Hide all management content
+        document.querySelectorAll('.management-content').forEach(content => {
+            content.classList.remove('active');
+        });
+
+        // Remove active class from all tabs
+        document.querySelectorAll('.management-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+
+        // Show selected tab content
+        document.getElementById(`${tabName}Tab`).classList.add('active');
+        
+        // Add active class to clicked tab
+        event.target.classList.add('active');
+    }
+
+    // Add exam modal
+    function showAddExamModal() {
+        document.getElementById('addExamModal').style.display = 'block';
+    }
+
+    function closeAddExamModal() {
+        document.getElementById('addExamModal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('addExamModal');
+        if (event.target === modal) {
+            closeAddExamModal();
+        }
+    }
+
+    // Add exam form submission
+    document.getElementById('addExamForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // In a real application, this would make an API call
+        alert('Exam record would be added here. This is a prototype.');
+        closeAddExamModal();
+    });
+
+    // Exam actions
+    function viewExamDetails(examId) {
+        alert(`View exam details for ID: ${examId}`);
+    }
+
+    function editExamRecord(examId) {
+        alert(`Edit exam record for ID: ${examId}`);
+    }
+
+    function deleteExamRecord(examId) {
+        if (confirm('Are you sure you want to delete this exam record?')) {
+            alert(`Delete exam record for ID: ${examId}`);
+        }
+    }
+
+    // Add animations to elements
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate stat cards
+        const statCards = document.querySelectorAll('.stat-card');
+        statCards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+            card.classList.add('animate-fadeInUp');
+        });
+
+        // Animate performance bars
+        setTimeout(() => {
+            document.querySelectorAll('.performance-bar').forEach((bar, index) => {
+                setTimeout(() => {
+                    bar.style.width = bar.style.width || '0%';
+                }, index * 100);
+            });
+        }, 1000);
+
+        // Add hover effects to table rows
+        document.querySelectorAll('.exams-table tr').forEach(row => {
+            row.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+                this.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
+            });
+            
+            row.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = 'none';
+            });
+        });
+    });
+
+    // Real-time updates simulation
+    function simulateLiveUpdates() {
+        setInterval(() => {
+            // Update stats randomly
+            const statNumbers = document.querySelectorAll('.stat-number');
+            statNumbers.forEach((stat, index) => {
+                if (index === 2) { // Average score
+                    const current = parseFloat(stat.textContent);
+                    const change = (Math.random() - 0.5) * 2; // -1 to 1
+                    const newValue = Math.max(0, Math.min(100, current + change));
+                    
+                    stat.textContent = newValue.toFixed(1);
+                    
+                    // Add pulse effect
+                    stat.style.animation = 'none';
+                    setTimeout(() => {
+                        stat.style.animation = 'pulse 0.5s ease-out';
+                    }, 10);
+                }
+            });
+        }, 15000); // Update every 15 seconds
+    }
+
+    // Start live updates
+    document.addEventListener('DOMContentLoaded', function() {
+        simulateLiveUpdates();
+    });
+</script>
+{% endblock %}

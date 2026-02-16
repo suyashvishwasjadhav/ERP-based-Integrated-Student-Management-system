@@ -1,0 +1,107 @@
+{% extends "base_sidebar.html" %}
+
+{% block sidebar_nav %}
+    <!-- Dashboard Section -->
+    <div class="nav-section">
+        <div class="nav-section-title">Main</div>
+        <a href="/dashboard" class="nav-item">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="/admin/applications" class="nav-item">
+            <i class="fas fa-file-alt"></i>
+            <span>Applications</span>
+            <span class="nav-badge" id="pendingCount">0</span>
+        </a>
+    </div>
+
+    <!-- Student Management Section -->
+    <div class="nav-section">
+        <div class="nav-section-title">Student Management</div>
+        <a href="/admin/students" class="nav-item">
+            <i class="fas fa-users"></i>
+            <span>All Students</span>
+        </a>
+        <a href="/admissions" class="nav-item">
+            <i class="fas fa-user-plus"></i>
+            <span>Admissions</span>
+        </a>
+        <a href="/attendance" class="nav-item">
+            <i class="fas fa-calendar-check"></i>
+            <span>Attendance</span>
+        </a>
+        <a href="/admin/tests" class="nav-item">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Tests & Exams</span>
+        </a>
+    </div>
+
+    <!-- Financial Management Section -->
+    <div class="nav-section">
+        <div class="nav-section-title">Financial</div>
+        <a href="/fees" class="nav-item">
+            <i class="fas fa-credit-card"></i>
+            <span>Fee Management</span>
+        </a>
+        <a href="/analytics" class="nav-item">
+            <i class="fas fa-chart-line"></i>
+            <span>Analytics</span>
+        </a>
+    </div>
+
+    <!-- Infrastructure Section -->
+    <div class="nav-section">
+        <div class="nav-section-title">Infrastructure</div>
+        <a href="/hostel" class="nav-item">
+            <i class="fas fa-bed"></i>
+            <span>Hostel Management</span>
+        </a>
+        <a href="/timetable" class="nav-item">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Timetable</span>
+        </a>
+    </div>
+
+    <!-- Organization Management Section -->
+    <div class="nav-section">
+        <div class="nav-section-title">Organization</div>
+        <a href="/admin/organizations" class="nav-item">
+            <i class="fas fa-building"></i>
+            <span>My Organizations</span>
+        </a>
+        <a href="/admin/create-organization" class="nav-item">
+            <i class="fas fa-plus-circle"></i>
+            <span>Create Organization</span>
+        </a>
+    </div>
+
+    <!-- Support Section -->
+    <div class="nav-section">
+        <div class="nav-section-title">Support</div>
+        <a href="/chatbot" class="nav-item">
+            <i class="fas fa-robot"></i>
+            <span>AI Assistant</span>
+        </a>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Update pending applications count
+    function updatePendingCount() {
+        fetch('/api/dashboard_data')
+            .then(response => response.json())
+            .then(data => {
+                const pendingCount = document.getElementById('pendingCount');
+                if (pendingCount && data.pending_applications) {
+                    pendingCount.textContent = data.pending_applications;
+                }
+            })
+            .catch(error => console.error('Error fetching data:', error));
+    }
+
+    // Update count on page load and every 30 seconds
+    document.addEventListener('DOMContentLoaded', updatePendingCount);
+    setInterval(updatePendingCount, 30000);
+</script>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends "base_sidebar.html" %}
+
+{% block sidebar_nav %}
+    <!-- Dashboard Section -->
+    <div class="nav-section">
+        <div class="nav-section-title">Main</div>
+        <a href="/student_portal" class="nav-item">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="/student/apply" class="nav-item">
+            <i class="fas fa-file-alt"></i>
+            <span>Apply</span>
+        </a>
+    </div>
+
+    <!-- Academic Section -->
+    <div class="nav-section">
+        <div class="nav-section-title">Academic</div>
+        <a href="/student/tests" class="nav-item">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Tests & Exams</span>
+        </a>
+        <a href="/student/attendance" class="nav-item">
+            <i class="fas fa-calendar-check"></i>
+            <span>Attendance</span>
+        </a>
+        <a href="/student/face-detection" class="nav-item">
+            <i class="fas fa-camera"></i>
+            <span>Face Detection</span>
+        </a>
+        <a href="/student/timetable" class="nav-item">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Timetable</span>
+        </a>
+    </div>
+
+    <!-- Financial Section -->
+    <div class="nav-section">
+        <div class="nav-section-title">Financial</div>
+        <a href="/payment_gateway" class="nav-item">
+            <i class="fas fa-credit-card"></i>
+            <span>Pay Fees</span>
+        </a>
+        <a href="/student/wallet" class="nav-item">
+            <i class="fas fa-wallet"></i>
+            <span>Digital Wallet</span>
+        </a>
+    </div>
+
+    <!-- Services Section -->
+    <div class="nav-section">
+        <div class="nav-section-title">Services</div>
+        <a href="/hostel_selection" class="nav-item">
+            <i class="fas fa-bed"></i>
+            <span>Hostel Selection</span>
+        </a>
+        <a href="/student/library" class="nav-item">
+            <i class="fas fa-book"></i>
+            <span>Digital Library</span>
+        </a>
+    </div>
+
+    <!-- Profile Section -->
+    <div class="nav-section">
+        <div class="nav-section-title">Profile</div>
+        <a href="/student/profile" class="nav-item">
+            <i class="fas fa-user-edit"></i>
+            <span>My Profile</span>
+        </a>
+    </div>
+
+    <!-- Support Section -->
+    <div class="nav-section">
+        <div class="nav-section-title">Support</div>
+        <a href="/student/chatbot" class="nav-item">
+            <i class="fas fa-robot"></i>
+            <span>AI Assistant</span>
+        </a>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add gamification effects
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add floating animation to nav items
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach((item, index) => {
+            item.style.animationDelay = `${index * 0.1}s`;
+            item.classList.add('slide-in-left');
+        });
+
+        // Add hover effects
+        navItems.forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(10px) scale(1.02)';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0) scale(1)';
+            });
+        });
+    });
+</script>
+{% endblock %}

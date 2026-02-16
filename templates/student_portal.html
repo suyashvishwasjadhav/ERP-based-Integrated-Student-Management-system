@@ -1,0 +1,1011 @@
+{% extends "base_student_sidebar.html" %}
+
+{% block title %}Student Dashboard - College ERP{% endblock %}
+
+{% block extra_css %}
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+
+        .student-portal-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .floating-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(86, 171, 47, 0.6);
+            border-radius: 50%;
+            animation: float 6s infinite linear;
+        }
+
+        .particle:nth-child(2n) {
+            background: rgba(102, 126, 234, 0.6);
+            animation-duration: 8s;
+        }
+
+        .particle:nth-child(3n) {
+            background: rgba(118, 75, 162, 0.6);
+            animation-duration: 10s;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .student-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .student-details h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .student-details p {
+            opacity: 0.8;
+            font-size: 1.1rem;
+        }
+
+        .student-id {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-family: monospace;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* Gamification Stats */
+        .gamification-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .stat-card:hover::before {
+            left: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            opacity: 0.8;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #56ab2f, #a8e6cf);
+            border-radius: 4px;
+            transition: width 1s ease;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Main Content Grid */
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(86, 171, 47, 0.2), rgba(168, 230, 207, 0.2));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .action-btn:hover::before {
+            opacity: 1;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-5px);
+            border-color: rgba(86, 171, 47, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .action-btn i {
+            font-size: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .action-btn span {
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Recent Activity */
+        .recent-activity {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            background: rgba(86, 171, 47, 0.2);
+            color: #56ab2f;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-time {
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        /* Achievements */
+        .achievements {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+
+        .achievement {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .achievement.unlocked {
+            background: rgba(86, 171, 47, 0.2);
+            border: 2px solid #56ab2f;
+            transform: scale(1.05);
+        }
+
+        .achievement.locked {
+            opacity: 0.5;
+            filter: grayscale(100%);
+        }
+
+        .achievement-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .achievement-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .achievement.unlocked .achievement-icon {
+            background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Academic Progress */
+        .academic-progress {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .subject-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .subject-item:last-child {
+            border-bottom: none;
+        }
+
+        .subject-name {
+            font-weight: 600;
+        }
+
+        .subject-grade {
+            background: rgba(86, 171, 47, 0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 10px;
+            font-weight: bold;
+            color: #56ab2f;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .student-info {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .gamification-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .actions-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .fade-in:nth-child(1) { animation-delay: 0.1s; }
+        .fade-in:nth-child(2) { animation-delay: 0.2s; }
+        .fade-in:nth-child(3) { animation-delay: 0.3s; }
+        .fade-in:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Pulse animation for achievements */
+        .achievement.unlocked {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1.05);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        /* Floating animation for stats */
+        .stat-card {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .stat-card:nth-child(2) { animation-delay: 0.5s; }
+        .stat-card:nth-child(3) { animation-delay: 1s; }
+        .stat-card:nth-child(4) { animation-delay: 1.5s; }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="student-portal-container">
+    <div class="floating-particles" id="particles"></div>
+        <!-- Header -->
+        <div class="header fade-in">
+            <div class="student-info">
+                <div class="avatar">JS</div>
+                <div class="student-details">
+                    <h1>{{ student.name }}</h1>
+                    <p>{{ student.course }} - Year {{ student.year }}</p>
+                    <div class="student-id">ID: {{ student.student_id }}</div>
+                </div>
+            </div>
+            <div class="logout-btn">
+                <a href="/logout" style="color: white; text-decoration: none; padding: 0.75rem 1.5rem; background: rgba(255, 255, 255, 0.2); border-radius: 10px; transition: all 0.3s ease;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Gamification Stats -->
+        <div class="gamification-stats">
+            <div class="stat-card fade-in">
+                <div class="stat-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="stat-value">{{ student.points }}</div>
+                <div class="stat-label">Points</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 75%"></div>
+                </div>
+            </div>
+            <div class="stat-card fade-in">
+                <div class="stat-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div class="stat-value">{{ student.achievements }}</div>
+                <div class="stat-label">Achievements</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 60%"></div>
+                </div>
+            </div>
+            <div class="stat-card fade-in">
+                <div class="stat-icon">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="stat-value">{{ student.attendance }}%</div>
+                <div class="stat-label">Attendance</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 95%"></div>
+                </div>
+            </div>
+            <div class="stat-card fade-in">
+                <div class="stat-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <div class="stat-value">{{ student.gpa }}</div>
+                <div class="stat-label">CGPA</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 85%"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Left Column -->
+            <div class="left-column">
+                <!-- Quick Actions -->
+                <div class="quick-actions fade-in">
+                    <h2 class="section-title">
+                        <i class="fas fa-bolt"></i>
+                        Quick Actions
+                    </h2>
+                    <div class="actions-grid">
+                        <a href="/student/wallet" class="action-btn">
+                            <i class="fas fa-wallet"></i>
+                            <span>Digital Wallet</span>
+                        </a>
+                        <a href="/student/library" class="action-btn">
+                            <i class="fas fa-book"></i>
+                            <span>Digital Library</span>
+                        </a>
+                        <a href="/payment_gateway" class="action-btn">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Pay Fees</span>
+                        </a>
+                        <a href="/hostel_selection" class="action-btn">
+                            <i class="fas fa-bed"></i>
+                            <span>Apply Hostel</span>
+                        </a>
+                        <a href="/student/exams" class="action-btn">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span>Exams</span>
+                        </a>
+                        <a href="/student/timetable" class="action-btn">
+                            <i class="fas fa-calendar"></i>
+                            <span>Timetable</span>
+                        </a>
+                        <a href="/student/attendance" class="action-btn">
+                            <i class="fas fa-user-check"></i>
+                            <span>Attendance</span>
+                        </a>
+                        <a href="/student/chatbot" class="action-btn">
+                            <i class="fas fa-robot"></i>
+                            <span>AI Assistant</span>
+                        </a>
+                        <a href="/student/profile" class="action-btn">
+                            <i class="fas fa-user-edit"></i>
+                            <span>Profile</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="recent-activity fade-in">
+                    <h2 class="section-title">
+                        <i class="fas fa-history"></i>
+                        Recent Activity
+                    </h2>
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">Fee Payment Completed</div>
+                            <div class="activity-time">2 hours ago</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">Hostel Room Allocated</div>
+                            <div class="activity-time">1 day ago</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-clipboard-check"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">Exam Schedule Updated</div>
+                            <div class="activity-time">3 days ago</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">Achievement Unlocked: Perfect Attendance</div>
+                            <div class="activity-time">1 week ago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="right-column">
+                <!-- Achievements -->
+                <div class="achievements fade-in">
+                    <h2 class="section-title">
+                        <i class="fas fa-medal"></i>
+                        Achievements
+                    </h2>
+                    <div class="achievement-grid">
+                        <div class="achievement unlocked">
+                            <div class="achievement-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="achievement-title">First Login</div>
+                        </div>
+                        <div class="achievement unlocked">
+                            <div class="achievement-icon">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <div class="achievement-title">Scholar</div>
+                        </div>
+                        <div class="achievement unlocked">
+                            <div class="achievement-icon">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <div class="achievement-title">Perfect Attendance</div>
+                        </div>
+                        <div class="achievement unlocked">
+                            <div class="achievement-icon">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                            <div class="achievement-title">Punctual Payer</div>
+                        </div>
+                        <div class="achievement locked">
+                            <div class="achievement-icon">
+                                <i class="fas fa-crown"></i>
+                            </div>
+                            <div class="achievement-title">Top Performer</div>
+                        </div>
+                        <div class="achievement locked">
+                            <div class="achievement-icon">
+                                <i class="fas fa-fire"></i>
+                            </div>
+                            <div class="achievement-title">Streak Master</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Academic Progress -->
+                <div class="academic-progress fade-in">
+                    <h2 class="section-title">
+                        <i class="fas fa-chart-line"></i>
+                        Academic Progress
+                    </h2>
+                    <div class="subject-item">
+                        <div class="subject-name">Data Structures</div>
+                        <div class="subject-grade">A+</div>
+                    </div>
+                    <div class="subject-item">
+                        <div class="subject-name">Database Systems</div>
+                        <div class="subject-grade">A</div>
+                    </div>
+                    <div class="subject-item">
+                        <div class="subject-name">Web Development</div>
+                        <div class="subject-grade">A-</div>
+                    </div>
+                    <div class="subject-item">
+                        <div class="subject-name">Machine Learning</div>
+                        <div class="subject-grade">B+</div>
+                    </div>
+                    <div class="subject-item">
+                        <div class="subject-name">Software Engineering</div>
+                        <div class="subject-grade">A</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dropout Prediction Section -->
+        {% if student.risk_score > 0.3 %}
+        <div class="dropout-prediction fade-in" style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border-radius: 20px; padding: 2rem; margin-bottom: 2rem; border: 1px solid rgba(255, 255, 255, 0.2);">
+            <h2 class="section-title" style="color: #ff6b6b;">
+                <i class="fas fa-exclamation-triangle"></i>
+                Dropout Risk Alert
+            </h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div>
+                    <h3 style="margin-bottom: 1rem; color: #ff6b6b;">Risk Score: {{ (student.risk_score * 100)|round }}%</h3>
+                    <div style="background: rgba(255, 107, 107, 0.2); padding: 1rem; border-radius: 10px; border-left: 4px solid #ff6b6b;">
+                        <h4 style="margin-bottom: 0.5rem;">Recommendations:</h4>
+                        <ul style="list-style: none; padding: 0;">
+                            {% for recommendation in student.recommendations %}
+                            <li style="margin-bottom: 0.5rem;">
+                                <i class="fas fa-arrow-right" style="color: #ff6b6b; margin-right: 0.5rem;"></i>
+                                {{ recommendation }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                <div>
+                    <h4 style="margin-bottom: 1rem;">Performance Indicators:</h4>
+                    <div style="display: grid; gap: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+                            <span>Attendance</span>
+                            <span style="color: {{ '#56ab2f' if student.attendance >= 75 else '#ff6b6b' }}">{{ student.attendance }}%</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+                            <span>GPA</span>
+                            <span style="color: {{ '#56ab2f' if student.gpa >= 6.0 else '#ff6b6b' }}">{{ student.gpa }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+                            <span>Fees Paid</span>
+                            <span style="color: {{ '#56ab2f' if student.total_fees_paid > 0 else '#ff6b6b' }}">₹{{ student.total_fees_paid }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 20;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Animate progress bars on load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create floating particles
+            createParticles();
+            const progressBars = document.querySelectorAll('.progress-fill');
+            progressBars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 500);
+            });
+
+            // Animate counters
+            const counters = document.querySelectorAll('.stat-value');
+            counters.forEach(counter => {
+                const target = counter.textContent;
+                if (!isNaN(target.replace(/,/g, ''))) {
+                    const finalValue = target.replace(/,/g, '');
+                    let current = 0;
+                    const increment = finalValue / 50;
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= finalValue) {
+                            counter.textContent = target;
+                            clearInterval(timer);
+                        } else {
+                            counter.textContent = Math.floor(current).toLocaleString();
+                        }
+                    }, 30);
+                }
+            });
+
+            // Add hover effects to action buttons
+            document.querySelectorAll('.action-btn').forEach(btn => {
+                btn.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-8px) scale(1.05)';
+                });
+                
+                btn.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(-5px) scale(1)';
+                });
+            });
+
+            // Simulate real-time updates
+            setInterval(() => {
+                const attendanceStat = document.querySelector('.stat-card:nth-child(3) .stat-value');
+                const currentAttendance = parseInt(attendanceStat.textContent);
+                if (Math.random() > 0.95) { // 5% chance every interval
+                    const newAttendance = Math.min(100, currentAttendance + 1);
+                    attendanceStat.textContent = newAttendance + '%';
+                    
+                    const progressBar = document.querySelector('.stat-card:nth-child(3) .progress-fill');
+                    progressBar.style.width = newAttendance + '%';
+                }
+            }, 5000);
+
+            // Achievement unlock animation
+            setTimeout(() => {
+                const lockedAchievement = document.querySelector('.achievement.locked');
+                if (lockedAchievement && Math.random() > 0.7) {
+                    lockedAchievement.classList.remove('locked');
+                    lockedAchievement.classList.add('unlocked');
+                    
+                    // Add confetti effect
+                    createConfetti();
+                    
+                    // Add notification
+                    const notification = document.createElement('div');
+                    notification.innerHTML = '🎉 Achievement Unlocked!';
+                    notification.style.cssText = `
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+                        color: white;
+                        padding: 1rem 2rem;
+                        border-radius: 10px;
+                        font-weight: bold;
+                        z-index: 1000;
+                        animation: slideIn 0.5s ease;
+                    `;
+                    document.body.appendChild(notification);
+                    
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 3000);
+                }
+            }, 10000);
+
+            // Add level up effect to level display
+            const levelElement = document.querySelector('.level-value');
+            if (levelElement) {
+                levelElement.addEventListener('click', function() {
+                    this.style.animation = 'pulse 0.5s ease';
+                    setTimeout(() => {
+                        this.style.animation = '';
+                    }, 500);
+                });
+            }
+
+            // Add achievement hover effects
+            const achievementCards = document.querySelectorAll('.achievement-card');
+            achievementCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-10px) scale(1.05)';
+                    this.style.boxShadow = '0 20px 40px rgba(86, 171, 47, 0.3)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                    this.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.2)';
+                });
+            });
+        });
+
+        // Add confetti effect for achievements
+        function createConfetti() {
+            const confettiContainer = document.createElement('div');
+            confettiContainer.style.position = 'fixed';
+            confettiContainer.style.top = '0';
+            confettiContainer.style.left = '0';
+            confettiContainer.style.width = '100%';
+            confettiContainer.style.height = '100%';
+            confettiContainer.style.pointerEvents = 'none';
+            confettiContainer.style.zIndex = '1000';
+            document.body.appendChild(confettiContainer);
+            
+            const colors = ['#56ab2f', '#667eea', '#764ba2', '#f093fb', '#f5576c'];
+            
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.position = 'absolute';
+                confetti.style.width = '10px';
+                confetti.style.height = '10px';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = '-10px';
+                confetti.style.animation = `confettiFall ${Math.random() * 3 + 2}s linear forwards`;
+                confettiContainer.appendChild(confetti);
+            }
+            
+            setTimeout(() => {
+                document.body.removeChild(confettiContainer);
+            }, 5000);
+        }
+
+        // Add CSS for notification animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes confettiFall {
+                0% {
+                    transform: translateY(-100vh) rotate(0deg);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateY(100vh) rotate(360deg);
+                    opacity: 0;
+                }
+            }
+            
+            @keyframes pulse {
+                0%, 100% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.1);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+{% endblock %}

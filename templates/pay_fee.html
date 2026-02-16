@@ -1,0 +1,1128 @@
+{% extends "base.html" %}
+
+{% block title %}Pay Fee - College ERP System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .pay-fee-container {
+        padding: 2rem 0;
+        min-height: calc(100vh - 80px);
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        animation: fadeInDown 1s ease-out;
+    }
+
+    .page-title {
+        font-size: 3rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+    }
+
+    .page-subtitle {
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 400;
+    }
+
+    /* Form Container */
+    .form-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideInUp 0.8s ease-out;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    /* Payment Steps */
+    .payment-steps {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 3rem;
+        animation: fadeInDown 0.8s ease-out;
+    }
+
+    .step {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .step-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: rgba(102, 126, 234, 0.1);
+        border: 3px solid rgba(102, 126, 234, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        color: #667eea;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .step-circle.active {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        transform: scale(1.1);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .step-circle.completed {
+        background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+        color: white;
+    }
+
+    .step-circle.completed::after {
+        content: '✓';
+        position: absolute;
+        font-size: 1.2rem;
+    }
+
+    .step-label {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #333;
+        text-align: center;
+    }
+
+    .step-connector {
+        width: 80px;
+        height: 3px;
+        background: rgba(102, 126, 234, 0.2);
+        margin: 0 1rem;
+        border-radius: 2px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .step-connector.active {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+
+    .step-connector.completed {
+        background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+    }
+
+    /* Form Sections */
+    .form-section {
+        margin-bottom: 2rem;
+        padding: 2rem;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.5);
+        border: 2px solid rgba(102, 126, 234, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .form-section.active {
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.05);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.1);
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-title i {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Form Grid */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #333;
+        font-size: 0.9rem;
+    }
+
+    .form-label.required::after {
+        content: ' *';
+        color: #ff416c;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid #e1e5e9;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.8);
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        background: white;
+    }
+
+    .form-control:invalid {
+        border-color: #ff416c;
+    }
+
+    .form-control:valid {
+        border-color: #56ab2f;
+    }
+
+    /* Input Groups */
+    .input-group {
+        position: relative;
+    }
+
+    .input-group i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #667eea;
+        z-index: 1;
+    }
+
+    .input-group .form-control {
+        padding-left: 3rem;
+    }
+
+    /* Student Info Display */
+    .student-info {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 2rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+        display: none;
+    }
+
+    .student-info.show {
+        display: block;
+        animation: slideInDown 0.5s ease-out;
+    }
+
+    .student-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .student-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .student-detail {
+        text-align: center;
+    }
+
+    .student-detail-label {
+        font-size: 0.8rem;
+        opacity: 0.8;
+        margin-bottom: 0.25rem;
+    }
+
+    .student-detail-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    /* Fee Breakdown */
+    .fee-breakdown {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        display: none;
+    }
+
+    .fee-breakdown.show {
+        display: block;
+        animation: slideInUp 0.5s ease-out;
+    }
+
+    .fee-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .fee-item:last-child {
+        border-bottom: none;
+        font-weight: 700;
+        font-size: 1.2rem;
+        background: rgba(102, 126, 234, 0.05);
+        margin: 0 -1.5rem -1.5rem -1.5rem;
+        padding: 1.5rem;
+        border-radius: 0 0 12px 12px;
+    }
+
+    .fee-label {
+        color: #333;
+        font-weight: 500;
+    }
+
+    .fee-amount {
+        color: #667eea;
+        font-weight: 600;
+    }
+
+    /* Payment Method */
+    .payment-methods {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .payment-method {
+        border: 2px solid #e1e5e9;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .payment-method:hover {
+        border-color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.1);
+    }
+
+    .payment-method.selected {
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.05);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.1);
+    }
+
+    .payment-method i {
+        font-size: 2.5rem;
+        color: #667eea;
+        margin-bottom: 1rem;
+    }
+
+    .payment-method-name {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+
+    .payment-method-desc {
+        font-size: 0.8rem;
+        color: #666;
+    }
+
+    /* Form Buttons */
+    .form-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 150px;
+        justify-content: center;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-secondary {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        border: 2px solid #667eea;
+    }
+
+    .btn-secondary:hover {
+        background: #667eea;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+        color: white;
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(86, 171, 47, 0.3);
+    }
+
+    /* Validation Messages */
+    .validation-message {
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .validation-error {
+        color: #ff416c;
+    }
+
+    .validation-success {
+        color: #56ab2f;
+    }
+
+    /* Success Animation */
+    .success-animation {
+        text-align: center;
+        padding: 3rem;
+        display: none;
+    }
+
+    .success-animation.show {
+        display: block;
+        animation: bounceIn 0.8s ease-out;
+    }
+
+    .success-animation i {
+        font-size: 5rem;
+        color: #56ab2f;
+        margin-bottom: 2rem;
+        animation: pulse 1s infinite;
+    }
+
+    .success-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 1rem;
+    }
+
+    .success-message {
+        font-size: 1.1rem;
+        color: #666;
+        margin-bottom: 2rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .form-container {
+            margin: 1rem;
+            padding: 2rem;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .form-buttons {
+            flex-direction: column;
+        }
+
+        .payment-steps {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .step-connector {
+            width: 3px;
+            height: 30px;
+            margin: 0.5rem 0;
+        }
+
+        .student-details {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    /* Loading States */
+    .loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @keyframes bounceIn {
+        0% {
+            opacity: 0;
+            transform: scale(0.3);
+        }
+        50% {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+        70% {
+            transform: scale(0.9);
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    /* Receipt Preview */
+    .receipt-preview {
+        background: white;
+        border: 2px solid #e1e5e9;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        display: none;
+    }
+
+    .receipt-preview.show {
+        display: block;
+        animation: slideInUp 0.5s ease-out;
+    }
+
+    .receipt-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .receipt-logo {
+        font-size: 2rem;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+
+    .receipt-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #333;
+    }
+
+    .receipt-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .receipt-item {
+        padding: 1rem;
+        background: rgba(102, 126, 234, 0.05);
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
+    }
+
+    .receipt-label {
+        font-weight: 600;
+        color: #666;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.25rem;
+    }
+
+    .receipt-value {
+        font-weight: 700;
+        color: #333;
+        font-size: 1.1rem;
+    }
+
+    .receipt-amount {
+        text-align: center;
+        padding: 2rem;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border-radius: 12px;
+    }
+
+    .receipt-amount-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-bottom: 0.5rem;
+    }
+
+    .receipt-amount-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pay-fee-container">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-credit-card"></i> Fee Payment
+            </h1>
+            <p class="page-subtitle">Process student fee payments with automated receipt generation</p>
+        </div>
+
+        <!-- Payment Steps -->
+        <div class="payment-steps">
+            <div class="step">
+                <div class="step-circle active" id="step1">1</div>
+                <div class="step-label">Student Info</div>
+            </div>
+            <div class="step-connector" id="connector1"></div>
+            <div class="step">
+                <div class="step-circle" id="step2">2</div>
+                <div class="step-label">Fee Details</div>
+            </div>
+            <div class="step-connector" id="connector2"></div>
+            <div class="step">
+                <div class="step-circle" id="step3">3</div>
+                <div class="step-label">Payment Method</div>
+            </div>
+            <div class="step-connector" id="connector3"></div>
+            <div class="step">
+                <div class="step-circle" id="step4">4</div>
+                <div class="step-label">Confirmation</div>
+            </div>
+        </div>
+
+        <!-- Form Container -->
+        <div class="form-container">
+            <form method="POST" action="{{ url_for('pay_fee') }}" id="paymentForm">
+                <!-- Step 1: Student Information -->
+                <div class="form-section active" id="section1">
+                    <h3 class="section-title">
+                        <i class="fas fa-user"></i> Student Information
+                    </h3>
+                    <div class="form-group">
+                        <label class="form-label required">Student ID</label>
+                        <div class="input-group">
+                            <i class="fas fa-id-card"></i>
+                            <input type="text" name="student_id" id="studentId" class="form-control" placeholder="Enter student ID" required>
+                        </div>
+                        <div class="validation-message" id="studentIdValidation"></div>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="button" class="btn btn-secondary" onclick="goBack()">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="validateStudent()" id="validateStudentBtn">
+                            <i class="fas fa-search"></i> Find Student
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Student Info Display -->
+                <div class="student-info" id="studentInfo">
+                    <div class="student-avatar" id="studentAvatar">S</div>
+                    <div class="student-details">
+                        <div class="student-detail">
+                            <div class="student-detail-label">Name</div>
+                            <div class="student-detail-value" id="studentName">-</div>
+                        </div>
+                        <div class="student-detail">
+                            <div class="student-detail-label">Course</div>
+                            <div class="student-detail-value" id="studentCourse">-</div>
+                        </div>
+                        <div class="student-detail">
+                            <div class="student-detail-label">Year</div>
+                            <div class="student-detail-value" id="studentYear">-</div>
+                        </div>
+                        <div class="student-detail">
+                            <div class="student-detail-label">Status</div>
+                            <div class="student-detail-value" id="studentStatus">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Fee Details -->
+                <div class="form-section" id="section2">
+                    <h3 class="section-title">
+                        <i class="fas fa-receipt"></i> Fee Details
+                    </h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label required">Fee Type</label>
+                            <div class="input-group">
+                                <i class="fas fa-tag"></i>
+                                <select name="fee_type" id="feeType" class="form-control" required>
+                                    <option value="">Select Fee Type</option>
+                                    <option value="Tuition Fee">Tuition Fee</option>
+                                    <option value="Hostel Fee">Hostel Fee</option>
+                                    <option value="Library Fee">Library Fee</option>
+                                    <option value="Exam Fee">Exam Fee</option>
+                                    <option value="Lab Fee">Lab Fee</option>
+                                    <option value="Sports Fee">Sports Fee</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="validation-message" id="feeTypeValidation"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label required">Amount</label>
+                            <div class="input-group">
+                                <i class="fas fa-rupee-sign"></i>
+                                <input type="number" name="amount" id="amount" class="form-control" placeholder="Enter amount" min="1" required>
+                            </div>
+                            <div class="validation-message" id="amountValidation"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Academic Year</label>
+                            <div class="input-group">
+                                <i class="fas fa-calendar"></i>
+                                <input type="text" name="academic_year" id="academicYear" class="form-control" placeholder="e.g., 2024-25" value="2024-25">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Semester</label>
+                            <div class="input-group">
+                                <i class="fas fa-calendar-alt"></i>
+                                <select name="semester" id="semester" class="form-control">
+                                    <option value="">Select Semester</option>
+                                    <option value="1">Semester 1</option>
+                                    <option value="2">Semester 2</option>
+                                    <option value="3">Semester 3</option>
+                                    <option value="4">Semester 4</option>
+                                    <option value="5">Semester 5</option>
+                                    <option value="6">Semester 6</option>
+                                    <option value="7">Semester 7</option>
+                                    <option value="8">Semester 8</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="button" class="btn btn-secondary" onclick="goToStep(1)">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="validateFeeDetails()" id="validateFeeBtn">
+                            <i class="fas fa-calculator"></i> Calculate Total
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Fee Breakdown -->
+                <div class="fee-breakdown" id="feeBreakdown">
+                    <h4 style="margin-bottom: 1rem; color: #333; font-weight: 700;">Fee Breakdown</h4>
+                    <div class="fee-item">
+                        <span class="fee-label" id="breakdownLabel">Base Fee</span>
+                        <span class="fee-amount" id="breakdownAmount">₹0</span>
+                    </div>
+                    <div class="fee-item">
+                        <span class="fee-label">Processing Fee (2%)</span>
+                        <span class="fee-amount" id="processingFee">₹0</span>
+                    </div>
+                    <div class="fee-item">
+                        <span class="fee-label">GST (18%)</span>
+                        <span class="fee-amount" id="gstAmount">₹0</span>
+                    </div>
+                    <div class="fee-item">
+                        <span class="fee-label">Total Amount</span>
+                        <span class="fee-amount" id="totalAmount">₹0</span>
+                    </div>
+                </div>
+
+                <!-- Step 3: Payment Method -->
+                <div class="form-section" id="section3">
+                    <h3 class="section-title">
+                        <i class="fas fa-credit-card"></i> Payment Method
+                    </h3>
+                    
+                    <div class="payment-methods">
+                        <div class="payment-method" data-method="cash">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <div class="payment-method-name">Cash Payment</div>
+                            <div class="payment-method-desc">Pay in cash at the counter</div>
+                        </div>
+                        <div class="payment-method" data-method="card">
+                            <i class="fas fa-credit-card"></i>
+                            <div class="payment-method-name">Card Payment</div>
+                            <div class="payment-method-desc">Credit/Debit card</div>
+                        </div>
+                        <div class="payment-method" data-method="netbanking">
+                            <i class="fas fa-university"></i>
+                            <div class="payment-method-name">Net Banking</div>
+                            <div class="payment-method-desc">Online transfer</div>
+                        </div>
+                        <div class="payment-method" data-method="upi">
+                            <i class="fas fa-mobile-alt"></i>
+                            <div class="payment-method-name">UPI Payment</div>
+                            <div class="payment-method-desc">PhonePe, Google Pay, etc.</div>
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="payment_method" id="paymentMethod" required>
+
+                    <div class="form-buttons">
+                        <button type="button" class="btn btn-secondary" onclick="goToStep(2)">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <a href="/payment_gateway" class="btn btn-primary" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                            <i class="fas fa-shield-alt"></i>
+                            Secure Payment Gateway
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Step 4: Confirmation -->
+                <div class="form-section" id="section4">
+                    <h3 class="section-title">
+                        <i class="fas fa-check-circle"></i> Payment Confirmation
+                    </h3>
+                    
+                    <div class="receipt-preview" id="receiptPreview">
+                        <div class="receipt-header">
+                            <div class="receipt-logo">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <div class="receipt-title">Fee Payment Receipt</div>
+                        </div>
+                        
+                        <div class="receipt-details">
+                            <div class="receipt-item">
+                                <div class="receipt-label">Student ID</div>
+                                <div class="receipt-value" id="receiptStudentId">-</div>
+                            </div>
+                            <div class="receipt-item">
+                                <div class="receipt-label">Fee Type</div>
+                                <div class="receipt-value" id="receiptFeeType">-</div>
+                            </div>
+                            <div class="receipt-item">
+                                <div class="receipt-label">Payment Method</div>
+                                <div class="receipt-value" id="receiptPaymentMethod">-</div>
+                            </div>
+                            <div class="receipt-item">
+                                <div class="receipt-label">Date</div>
+                                <div class="receipt-value" id="receiptDate">-</div>
+                            </div>
+                        </div>
+                        
+                        <div class="receipt-amount">
+                            <div class="receipt-amount-label">Amount to Pay</div>
+                            <div class="receipt-amount-value" id="receiptAmount">₹0</div>
+                        </div>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="button" class="btn btn-secondary" onclick="goToStep(3)">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <button type="submit" class="btn btn-success" id="submitPaymentBtn">
+                            <i class="fas fa-check"></i> Confirm Payment
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Success Animation -->
+                <div class="success-animation" id="successAnimation">
+                    <i class="fas fa-check-circle"></i>
+                    <div class="success-title">Payment Successful!</div>
+                    <div class="success-message">
+                        Fee payment has been processed successfully. Receipt has been generated and sent to the student.
+                    </div>
+                    <a href="{{ url_for('fees') }}" class="btn btn-primary">
+                        <i class="fas fa-list"></i> View All Fees
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentStep = 1;
+    let selectedStudent = null;
+    let selectedPaymentMethod = null;
+
+    // Step navigation
+    function goToStep(step) {
+        // Hide all sections
+        document.querySelectorAll('.form-section').forEach(section => {
+            section.classList.remove('active');
+        });
+
+        // Show target section
+        document.getElementById(`section${step}`).classList.add('active');
+
+        // Update step indicators
+        updateStepIndicators(step);
+        currentStep = step;
+    }
+
+    function updateStepIndicators(step) {
+        for (let i = 1; i <= 4; i++) {
+            const stepCircle = document.getElementById(`step${i}`);
+            const connector = document.getElementById(`connector${i}`);
+
+            if (i < step) {
+                stepCircle.className = 'step-circle completed';
+                if (connector) connector.className = 'step-connector completed';
+            } else if (i === step) {
+                stepCircle.className = 'step-circle active';
+                if (connector) connector.className = 'step-connector active';
+            } else {
+                stepCircle.className = 'step-circle';
+                if (connector) connector.className = 'step-connector';
+            }
+        }
+    }
+
+    // Student validation
+    function validateStudent() {
+        const studentId = document.getElementById('studentId').value.trim();
+        const validationDiv = document.getElementById('studentIdValidation');
+
+        if (!studentId) {
+            validationDiv.textContent = 'Please enter a student ID';
+            validationDiv.className = 'validation-message validation-error';
+            return;
+        }
+
+        // Simulate student lookup
+        const studentData = {
+            'STU202412011': {
+                name: 'John Doe',
+                course: 'Computer Science',
+                year: '2',
+                status: 'Active',
+                email: 'john.doe@college.edu'
+            },
+            'STU202412012': {
+                name: 'Jane Smith',
+                course: 'Electronics',
+                year: '1',
+                status: 'Active',
+                email: 'jane.smith@college.edu'
+            }
+        };
+
+        if (studentData[studentId]) {
+            selectedStudent = studentData[studentId];
+            displayStudentInfo(studentData[studentId]);
+            validationDiv.textContent = '✓ Student found';
+            validationDiv.className = 'validation-message validation-success';
+            
+            setTimeout(() => {
+                goToStep(2);
+            }, 1000);
+        } else {
+            validationDiv.textContent = 'Student not found. Please check the ID and try again.';
+            validationDiv.className = 'validation-message validation-error';
+        }
+    }
+
+    function displayStudentInfo(student) {
+        document.getElementById('studentName').textContent = student.name;
+        document.getElementById('studentCourse').textContent = student.course;
+        document.getElementById('studentYear').textContent = `Year ${student.year}`;
+        document.getElementById('studentStatus').textContent = student.status;
+        document.getElementById('studentAvatar').textContent = student.name[0].toUpperCase();
+        
+        document.getElementById('studentInfo').classList.add('show');
+    }
+
+    // Fee validation
+    function validateFeeDetails() {
+        const feeType = document.getElementById('feeType').value;
+        const amount = parseFloat(document.getElementById('amount').value);
+
+        if (!feeType) {
+            document.getElementById('feeTypeValidation').textContent = 'Please select a fee type';
+            document.getElementById('feeTypeValidation').className = 'validation-message validation-error';
+            return;
+        }
+
+        if (!amount || amount <= 0) {
+            document.getElementById('amountValidation').textContent = 'Please enter a valid amount';
+            document.getElementById('amountValidation').className = 'validation-message validation-error';
+            return;
+        }
+
+        calculateFeeBreakdown(feeType, amount);
+        document.getElementById('feeBreakdown').classList.add('show');
+        
+        setTimeout(() => {
+            goToStep(3);
+        }, 1000);
+    }
+
+    function calculateFeeBreakdown(feeType, amount) {
+        const processingFee = amount * 0.02;
+        const gstAmount = amount * 0.18;
+        const totalAmount = amount + processingFee + gstAmount;
+
+        document.getElementById('breakdownLabel').textContent = feeType;
+        document.getElementById('breakdownAmount').textContent = `₹${amount.toLocaleString()}`;
+        document.getElementById('processingFee').textContent = `₹${processingFee.toLocaleString()}`;
+        document.getElementById('gstAmount').textContent = `₹${gstAmount.toLocaleString()}`;
+        document.getElementById('totalAmount').textContent = `₹${totalAmount.toLocaleString()}`;
+    }
+
+    // Payment method selection
+    document.querySelectorAll('.payment-method').forEach(method => {
+        method.addEventListener('click', function() {
+            // Remove selection from all methods
+            document.querySelectorAll('.payment-method').forEach(m => {
+                m.classList.remove('selected');
+            });
+
+            // Add selection to clicked method
+            this.classList.add('selected');
+            selectedPaymentMethod = this.dataset.method;
+            document.getElementById('paymentMethod').value = selectedPaymentMethod;
+        });
+    });
+
+    function validatePaymentMethod() {
+        if (!selectedPaymentMethod) {
+            alert('Please select a payment method');
+            return;
+        }
+
+        updateReceiptPreview();
+        document.getElementById('receiptPreview').classList.add('show');
+        
+        setTimeout(() => {
+            goToStep(4);
+        }, 1000);
+    }
+
+    function updateReceiptPreview() {
+        const studentId = document.getElementById('studentId').value;
+        const feeType = document.getElementById('feeType').value;
+        const amount = document.getElementById('amount').value;
+        const totalAmount = document.getElementById('totalAmount').textContent;
+
+        document.getElementById('receiptStudentId').textContent = studentId;
+        document.getElementById('receiptFeeType').textContent = feeType;
+        document.getElementById('receiptPaymentMethod').textContent = selectedPaymentMethod.charAt(0).toUpperCase() + selectedPaymentMethod.slice(1);
+        document.getElementById('receiptDate').textContent = new Date().toLocaleDateString();
+        document.getElementById('receiptAmount').textContent = totalAmount;
+    }
+
+    // Form submission
+    document.getElementById('paymentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const submitBtn = document.getElementById('submitPaymentBtn');
+        submitBtn.innerHTML = '<span class="spinner"></span> Processing...';
+        submitBtn.disabled = true;
+
+        // Simulate payment processing
+        setTimeout(() => {
+            document.querySelector('.form-container').style.display = 'none';
+            document.getElementById('successAnimation').classList.add('show');
+        }, 2000);
+    });
+
+    // Go back function
+    function goBack() {
+        window.history.back();
+    }
+
+    // Real-time validation
+    document.addEventListener('DOMContentLoaded', function() {
+        // Student ID validation
+        document.getElementById('studentId').addEventListener('input', function() {
+            const value = this.value.trim();
+            if (value.length > 0) {
+                this.classList.add('valid');
+                this.classList.remove('invalid');
+            }
+        });
+
+        // Amount validation
+        document.getElementById('amount').addEventListener('input', function() {
+            const value = parseFloat(this.value);
+            if (value > 0) {
+                this.classList.add('valid');
+                this.classList.remove('invalid');
+            }
+        });
+
+        // Auto-fill academic year
+        const currentYear = new Date().getFullYear();
+        const nextYear = currentYear + 1;
+        document.getElementById('academicYear').value = `${currentYear}-${nextYear.toString().slice(-2)}`;
+    });
+
+    // Add animations
+    document.addEventListener('DOMContentLoaded', function() {
+        const sections = document.querySelectorAll('.form-section');
+        sections.forEach((section, index) => {
+            section.style.animationDelay = `${index * 0.2}s`;
+            section.classList.add('animate-fadeInUp');
+        });
+    });
+</script>
+{% endblock %}

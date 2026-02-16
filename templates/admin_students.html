@@ -1,0 +1,393 @@
+{% extends "base_admin_sidebar.html" %}
+
+{% block title %}Student Management - College ERP{% endblock %}
+
+{% block extra_css %}
+<style>
+    .students-container {
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .page-title {
+        font-size: 2rem;
+        font-weight: bold;
+        color: white;
+        margin: 0;
+    }
+
+    .search-filters {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .search-input {
+        padding: 0.75rem 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        backdrop-filter: blur(10px);
+        min-width: 250px;
+    }
+
+    .search-input::placeholder {
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .filter-select {
+        padding: 0.75rem 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        backdrop-filter: blur(10px);
+        cursor: pointer;
+    }
+
+    .students-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .student-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 15px;
+        padding: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .student-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        border-color: rgba(86, 171, 47, 0.3);
+    }
+
+    .student-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .student-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: white;
+    }
+
+    .student-info h3 {
+        color: white;
+        margin: 0 0 0.25rem 0;
+        font-size: 1.2rem;
+    }
+
+    .student-info p {
+        color: rgba(255, 255, 255, 0.8);
+        margin: 0;
+        font-size: 0.9rem;
+    }
+
+    .student-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-item {
+        text-align: center;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 0.75rem;
+        border-radius: 10px;
+    }
+
+    .stat-value {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #56ab2f;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.7);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .student-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .action-btn {
+        flex: 1;
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+        color: white;
+    }
+
+    .btn-warning {
+        background: linear-gradient(135deg, #f093fb, #f5576c);
+        color: white;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .risk-indicator {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }
+
+    .risk-low {
+        background: #56ab2f;
+    }
+
+    .risk-medium {
+        background: #f39c12;
+    }
+
+    .risk-high {
+        background: #e74c3c;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.5;
+        }
+    }
+
+    .no-students {
+        text-align: center;
+        padding: 3rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .no-students i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 2rem;
+    }
+
+    .page-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .page-btn:hover,
+    .page-btn.active {
+        background: rgba(86, 171, 47, 0.3);
+        border-color: #56ab2f;
+    }
+
+    @media (max-width: 768px) {
+        .students-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .search-filters {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .search-input {
+            min-width: auto;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="students-container">
+    <div class="page-header">
+        <h1 class="page-title">Student Management</h1>
+        <div class="search-filters">
+            <input type="text" class="search-input" placeholder="Search students..." id="searchInput">
+            <select class="filter-select" id="courseFilter">
+                <option value="">All Courses</option>
+                <option value="Engineering">Engineering</option>
+                <option value="Management">Management</option>
+                <option value="Arts">Arts</option>
+                <option value="Science">Science</option>
+            </select>
+            <select class="filter-select" id="statusFilter">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="graduated">Graduated</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="students-grid" id="studentsGrid">
+        {% for student in students %}
+        <div class="student-card" data-course="{{ student.course }}" data-status="{{ student.status }}">
+            <div class="risk-indicator risk-{{ student.risk_level }}"></div>
+            <div class="student-header">
+                <div class="student-avatar">{{ student.name[0] }}</div>
+                <div class="student-info">
+                    <h3>{{ student.name }}</h3>
+                    <p>{{ student.student_id }} • {{ student.course }}</p>
+                </div>
+            </div>
+            <div class="student-stats">
+                <div class="stat-item">
+                    <div class="stat-value">{{ student.attendance }}%</div>
+                    <div class="stat-label">Attendance</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{{ student.gpa }}</div>
+                    <div class="stat-label">GPA</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">₹{{ student.fees_paid }}</div>
+                    <div class="stat-label">Fees Paid</div>
+                </div>
+            </div>
+            <div class="student-actions">
+                <a href="/admin/students/{{ student.id }}" class="action-btn btn-primary">
+                    <i class="fas fa-eye"></i>
+                    View Details
+                </a>
+                <a href="/admin/students/{{ student.id }}/attendance" class="action-btn btn-success">
+                    <i class="fas fa-calendar-check"></i>
+                    Attendance
+                </a>
+                <a href="/admin/students/{{ student.id }}/edit" class="action-btn btn-warning">
+                    <i class="fas fa-edit"></i>
+                    Edit
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if not students %}
+    <div class="no-students">
+        <i class="fas fa-user-graduate"></i>
+        <h3>No Students Found</h3>
+        <p>No students have been registered yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const courseFilter = document.getElementById('courseFilter');
+        const statusFilter = document.getElementById('statusFilter');
+        const studentsGrid = document.getElementById('studentsGrid');
+
+        function filterStudents() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const courseValue = courseFilter.value;
+            const statusValue = statusFilter.value;
+
+            const studentCards = studentsGrid.querySelectorAll('.student-card');
+            
+            studentCards.forEach(card => {
+                const name = card.querySelector('h3').textContent.toLowerCase();
+                const course = card.dataset.course;
+                const status = card.dataset.status;
+
+                const matchesSearch = name.includes(searchTerm);
+                const matchesCourse = !courseValue || course === courseValue;
+                const matchesStatus = !statusValue || status === statusValue;
+
+                if (matchesSearch && matchesCourse && matchesStatus) {
+                    card.style.display = 'block';
+                    card.classList.add('fade-in');
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        searchInput.addEventListener('input', filterStudents);
+        courseFilter.addEventListener('change', filterStudents);
+        statusFilter.addEventListener('change', filterStudents);
+
+        // Add animation to cards
+        const cards = document.querySelectorAll('.student-card');
+        cards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+            card.classList.add('fade-in');
+        });
+    });
+</script>
+{% endblock %}

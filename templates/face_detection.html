@@ -1,0 +1,567 @@
+{% extends "base_student_sidebar.html" %}
+
+{% block title %}Face Detection Attendance - College ERP{% endblock %}
+
+{% block extra_css %}
+<style>
+    .face-detection-container {
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding: 2rem;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: white;
+        margin-bottom: 1rem;
+    }
+
+    .page-subtitle {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1.2rem;
+    }
+
+    .detection-area {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .camera-container {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        text-align: center;
+    }
+
+    .camera-title {
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+    }
+
+    .video-container {
+        position: relative;
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    #videoElement {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .detection-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+    }
+
+    .face-box {
+        position: absolute;
+        border: 3px solid #56ab2f;
+        border-radius: 5px;
+        background: rgba(86, 171, 47, 0.1);
+        animation: pulse 2s infinite;
+    }
+
+    .face-box.detected {
+        border-color: #56ab2f;
+        background: rgba(86, 171, 47, 0.2);
+    }
+
+    .face-box.not-detected {
+        border-color: #e74c3c;
+        background: rgba(231, 76, 60, 0.1);
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.7;
+        }
+    }
+
+    .controls {
+        margin-top: 1.5rem;
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .control-btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 10px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-start {
+        background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+        color: white;
+    }
+
+    .btn-stop {
+        background: linear-gradient(135deg, #e74c3c, #f39c12);
+        color: white;
+    }
+
+    .btn-capture {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+
+    .control-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .control-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .status-panel {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .status-title {
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+    }
+
+    .status-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .status-item:last-child {
+        border-bottom: none;
+    }
+
+    .status-label {
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 500;
+    }
+
+    .status-value {
+        color: white;
+        font-weight: bold;
+    }
+
+    .status-value.success {
+        color: #56ab2f;
+    }
+
+    .status-value.warning {
+        color: #f39c12;
+    }
+
+    .status-value.error {
+        color: #e74c3c;
+    }
+
+    .detection-log {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-top: 1rem;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .log-entry {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        padding: 0.25rem 0;
+    }
+
+    .log-entry.success {
+        color: #56ab2f;
+    }
+
+    .log-entry.error {
+        color: #e74c3c;
+    }
+
+    .coordinates-info {
+        background: rgba(86, 171, 47, 0.1);
+        border: 1px solid #56ab2f;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+
+    .coordinates-title {
+        color: #56ab2f;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+
+    .coordinates-text {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+        .detection-area {
+            grid-template-columns: 1fr;
+        }
+        
+        .controls {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .control-btn {
+            width: 100%;
+            max-width: 300px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="face-detection-container">
+    <div class="page-header">
+        <h1 class="page-title">Face Detection Attendance</h1>
+        <p class="page-subtitle">Position your face within the camera view to mark your attendance</p>
+    </div>
+
+    <div class="detection-area">
+        <div class="camera-container">
+            <h3 class="camera-title">Camera Feed</h3>
+            <div class="video-container">
+                <video id="videoElement" autoplay muted></video>
+                <div class="detection-overlay" id="detectionOverlay"></div>
+            </div>
+            <div class="controls">
+                <button class="control-btn btn-start" id="startBtn">
+                    <i class="fas fa-play"></i>
+                    Start Camera
+                </button>
+                <button class="control-btn btn-stop" id="stopBtn" disabled>
+                    <i class="fas fa-stop"></i>
+                    Stop Camera
+                </button>
+                <button class="control-btn btn-capture" id="captureBtn" disabled>
+                    <i class="fas fa-camera"></i>
+                    Mark Attendance
+                </button>
+            </div>
+        </div>
+
+        <div class="status-panel">
+            <h3 class="status-title">Detection Status</h3>
+            <div class="status-item">
+                <span class="status-label">Camera Status</span>
+                <span class="status-value" id="cameraStatus">Not Started</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Face Detection</span>
+                <span class="status-value" id="faceStatus">Not Detected</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Confidence Level</span>
+                <span class="status-value" id="confidenceLevel">0%</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Attendance Status</span>
+                <span class="status-value" id="attendanceStatus">Not Marked</span>
+            </div>
+
+            <div class="coordinates-info">
+                <div class="coordinates-title">Detection Coordinates</div>
+                <div class="coordinates-text" id="coordinatesText">
+                    Position your face in the center of the camera view for best results.
+                </div>
+            </div>
+
+            <div class="detection-log" id="detectionLog">
+                <div class="log-entry">System ready. Click "Start Camera" to begin.</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let video = document.getElementById('videoElement');
+    let startBtn = document.getElementById('startBtn');
+    let stopBtn = document.getElementById('stopBtn');
+    let captureBtn = document.getElementById('captureBtn');
+    let detectionOverlay = document.getElementById('detectionOverlay');
+    let cameraStatus = document.getElementById('cameraStatus');
+    let faceStatus = document.getElementById('faceStatus');
+    let confidenceLevel = document.getElementById('confidenceLevel');
+    let attendanceStatus = document.getElementById('attendanceStatus');
+    let coordinatesText = document.getElementById('coordinatesText');
+    let detectionLog = document.getElementById('detectionLog');
+    
+    let stream = null;
+    let isDetecting = false;
+    let detectionInterval = null;
+    let faceDetected = false;
+    let lastDetectionTime = 0;
+
+    // Start camera
+    startBtn.addEventListener('click', async () => {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    width: 640, 
+                    height: 480,
+                    facingMode: 'user'
+                } 
+            });
+            video.srcObject = stream;
+            
+            cameraStatus.textContent = 'Active';
+            cameraStatus.className = 'status-value success';
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            captureBtn.disabled = false;
+            
+            addLogEntry('Camera started successfully', 'success');
+            startFaceDetection();
+        } catch (err) {
+            addLogEntry('Failed to start camera: ' + err.message, 'error');
+            cameraStatus.textContent = 'Error';
+            cameraStatus.className = 'status-value error';
+        }
+    });
+
+    // Stop camera
+    stopBtn.addEventListener('click', () => {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+        }
+        
+        video.srcObject = null;
+        cameraStatus.textContent = 'Stopped';
+        cameraStatus.className = 'status-value';
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+        captureBtn.disabled = true;
+        
+        stopFaceDetection();
+        addLogEntry('Camera stopped', 'success');
+    });
+
+    // Mark attendance
+    captureBtn.addEventListener('click', async () => {
+        if (!faceDetected) {
+            addLogEntry('No face detected. Please position your face in the camera view.', 'error');
+            return;
+        }
+
+        try {
+            // Capture current frame
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+            const imageData = canvas.toDataURL('image/jpeg');
+
+            // Send to server
+            const response = await fetch('/api/face-detection', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    image: imageData,
+                    coordinates: getCurrentCoordinates(),
+                    confidence: getCurrentConfidence()
+                })
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                attendanceStatus.textContent = 'Marked Successfully';
+                attendanceStatus.className = 'status-value success';
+                addLogEntry('Attendance marked successfully!', 'success');
+                
+                // Disable capture button temporarily
+                captureBtn.disabled = true;
+                setTimeout(() => {
+                    captureBtn.disabled = false;
+                    attendanceStatus.textContent = 'Not Marked';
+                    attendanceStatus.className = 'status-value';
+                }, 5000);
+            } else {
+                addLogEntry('Failed to mark attendance: ' + result.error, 'error');
+            }
+        } catch (err) {
+            addLogEntry('Error marking attendance: ' + err.message, 'error');
+        }
+    });
+
+    function startFaceDetection() {
+        isDetecting = true;
+        detectionInterval = setInterval(detectFace, 100); // Check every 100ms
+        addLogEntry('Face detection started', 'success');
+    }
+
+    function stopFaceDetection() {
+        isDetecting = false;
+        if (detectionInterval) {
+            clearInterval(detectionInterval);
+            detectionInterval = null;
+        }
+        faceStatus.textContent = 'Not Detected';
+        faceStatus.className = 'status-value';
+        confidenceLevel.textContent = '0%';
+        clearFaceBoxes();
+    }
+
+    function detectFace() {
+        if (!isDetecting || !video.videoWidth || !video.videoHeight) return;
+
+        // Simulate face detection (in real implementation, use OpenCV.js or similar)
+        const currentTime = Date.now();
+        const timeSinceLastDetection = currentTime - lastDetectionTime;
+        
+        // Simulate random face detection for demo
+        const random = Math.random();
+        const isFacePresent = random > 0.3; // 70% chance of face detection
+        
+        if (isFacePresent && timeSinceLastDetection > 1000) {
+            faceDetected = true;
+            lastDetectionTime = currentTime;
+            
+            // Update status
+            faceStatus.textContent = 'Detected';
+            faceStatus.className = 'status-value success';
+            
+            // Simulate confidence level
+            const confidence = Math.floor(Math.random() * 30) + 70; // 70-100%
+            confidenceLevel.textContent = confidence + '%';
+            confidenceLevel.className = 'status-value success';
+            
+            // Draw face box
+            drawFaceBox();
+            
+            // Update coordinates
+            const coords = getCurrentCoordinates();
+            coordinatesText.textContent = `X: ${coords.x}, Y: ${coords.y}, Width: ${coords.width}, Height: ${coords.height}`;
+        } else if (timeSinceLastDetection > 2000) {
+            faceDetected = false;
+            faceStatus.textContent = 'Not Detected';
+            faceStatus.className = 'status-value error';
+            confidenceLevel.textContent = '0%';
+            confidenceLevel.className = 'status-value error';
+            clearFaceBoxes();
+            coordinatesText.textContent = 'Position your face in the center of the camera view for best results.';
+        }
+    }
+
+    function drawFaceBox() {
+        clearFaceBoxes();
+        
+        // Simulate face box coordinates (center of video)
+        const videoRect = video.getBoundingClientRect();
+        const boxWidth = videoRect.width * 0.3;
+        const boxHeight = videoRect.height * 0.4;
+        const boxX = (videoRect.width - boxWidth) / 2;
+        const boxY = (videoRect.height - boxHeight) / 2;
+        
+        const faceBox = document.createElement('div');
+        faceBox.className = 'face-box detected';
+        faceBox.style.left = boxX + 'px';
+        faceBox.style.top = boxY + 'px';
+        faceBox.style.width = boxWidth + 'px';
+        faceBox.style.height = boxHeight + 'px';
+        
+        detectionOverlay.appendChild(faceBox);
+    }
+
+    function clearFaceBoxes() {
+        detectionOverlay.innerHTML = '';
+    }
+
+    function getCurrentCoordinates() {
+        const videoRect = video.getBoundingClientRect();
+        return {
+            x: Math.floor((videoRect.width - videoRect.width * 0.3) / 2),
+            y: Math.floor((videoRect.height - videoRect.height * 0.4) / 2),
+            width: Math.floor(videoRect.width * 0.3),
+            height: Math.floor(videoRect.height * 0.4)
+        };
+    }
+
+    function getCurrentConfidence() {
+        return Math.floor(Math.random() * 30) + 70; // 70-100%
+    }
+
+    function addLogEntry(message, type = '') {
+        const logEntry = document.createElement('div');
+        logEntry.className = 'log-entry ' + type;
+        logEntry.textContent = new Date().toLocaleTimeString() + ': ' + message;
+        
+        detectionLog.appendChild(logEntry);
+        detectionLog.scrollTop = detectionLog.scrollHeight;
+        
+        // Keep only last 10 entries
+        while (detectionLog.children.length > 10) {
+            detectionLog.removeChild(detectionLog.firstChild);
+        }
+    }
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+        if (detectionInterval) {
+            clearInterval(detectionInterval);
+        }
+    });
+</script>
+{% endblock %}

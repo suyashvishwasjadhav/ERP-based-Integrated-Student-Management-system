@@ -1,0 +1,997 @@
+{% extends "base.html" %}
+
+{% block title %}Fee Collection - College ERP System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .fees-container {
+        padding: 2rem 0;
+        min-height: calc(100vh - 80px);
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        animation: fadeInDown 1s ease-out;
+    }
+
+    .page-title {
+        font-size: 3rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+    }
+
+    .page-subtitle {
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 400;
+    }
+
+    /* Quick Stats */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0.1s; }
+    .stat-card:nth-child(2) { animation-delay: 0.2s; }
+    .stat-card:nth-child(3) { animation-delay: 0.3s; }
+    .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+    .stat-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: pulse 2s infinite;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #333;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .stat-label {
+        color: #666;
+        font-weight: 600;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Search and Filter Section */
+    .search-section {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideInUp 0.8s ease-out;
+    }
+
+    .search-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        align-items: end;
+    }
+
+    .search-input {
+        position: relative;
+    }
+
+    .search-input i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #667eea;
+        z-index: 1;
+    }
+
+    .search-input input {
+        padding-left: 3rem;
+    }
+
+    /* Fees Table */
+    .fees-section {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideInUp 0.8s ease-out;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Enhanced Table Styles */
+    .table-container {
+        overflow-x: auto;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .table th {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        font-weight: 600;
+        padding: 1.5rem 1rem;
+        text-align: left;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .table td {
+        padding: 1.5rem 1rem;
+        border-bottom: 1px solid #f0f0f0;
+        vertical-align: middle;
+    }
+
+    .table tr {
+        transition: all 0.3s ease;
+    }
+
+    .table tr:hover {
+        background: rgba(102, 126, 234, 0.05);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .table tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Receipt Number Badge */
+    .receipt-number {
+        background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        display: inline-block;
+    }
+
+    /* Status Badges */
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-paid {
+        background: rgba(86, 171, 47, 0.1);
+        color: #56ab2f;
+        border: 2px solid rgba(86, 171, 47, 0.2);
+    }
+
+    .status-pending {
+        background: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+        border: 2px solid rgba(255, 193, 7, 0.2);
+    }
+
+    .status-overdue {
+        background: rgba(255, 65, 108, 0.1);
+        color: #ff416c;
+        border: 2px solid rgba(255, 65, 108, 0.2);
+    }
+
+    /* Amount Display */
+    .amount-display {
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: #333;
+    }
+
+    .amount-paid {
+        color: #56ab2f;
+    }
+
+    .amount-pending {
+        color: #ffc107;
+    }
+
+    .amount-overdue {
+        color: #ff416c;
+    }
+
+    /* Fee Type Badge */
+    .fee-type-badge {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        text-transform: capitalize;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-view {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        border: 1px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .btn-view:hover {
+        background: #667eea;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-print {
+        background: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+        border: 1px solid rgba(255, 193, 7, 0.2);
+    }
+
+    .btn-print:hover {
+        background: #ffc107;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-send {
+        background: rgba(86, 171, 47, 0.1);
+        color: #56ab2f;
+        border: 1px solid rgba(86, 171, 47, 0.2);
+    }
+
+    .btn-send:hover {
+        background: #56ab2f;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    /* Payment Date */
+    .payment-date {
+        color: #666;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .search-form {
+            grid-template-columns: 1fr;
+        }
+
+        .section-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
+        }
+
+        .table-container {
+            font-size: 0.8rem;
+        }
+
+        .table th,
+        .table td {
+            padding: 1rem 0.5rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #666;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        color: #ccc;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: #333;
+    }
+
+    .empty-state p {
+        font-size: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    /* Loading States */
+    .loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Receipt Modal */
+    .receipt-modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    .receipt-content {
+        background: white;
+        margin: 2% auto;
+        padding: 2rem;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 600px;
+        position: relative;
+        animation: slideInDown 0.3s ease-out;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .receipt-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .receipt-logo {
+        font-size: 2rem;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+
+    .receipt-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+
+    .receipt-subtitle {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .receipt-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .receipt-item {
+        padding: 1rem;
+        background: rgba(102, 126, 234, 0.05);
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
+    }
+
+    .receipt-label {
+        font-weight: 600;
+        color: #666;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.25rem;
+    }
+
+    .receipt-value {
+        font-weight: 700;
+        color: #333;
+        font-size: 1.1rem;
+    }
+
+    .receipt-amount {
+        text-align: center;
+        padding: 2rem;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+    }
+
+    .receipt-amount-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-bottom: 0.5rem;
+    }
+
+    .receipt-amount-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+    }
+
+    .receipt-footer {
+        text-align: center;
+        padding-top: 1rem;
+        border-top: 2px solid #f0f0f0;
+        color: #666;
+        font-size: 0.8rem;
+    }
+
+    .close-receipt {
+        position: absolute;
+        right: 1rem;
+        top: 1rem;
+        font-size: 2rem;
+        cursor: pointer;
+        color: #666;
+        transition: color 0.3s ease;
+    }
+
+    .close-receipt:hover {
+        color: #ff416c;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fees-container">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-credit-card"></i> Fee Collection
+            </h1>
+            <p class="page-subtitle">Manage student fee payments and receipts</p>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="stats-grid">
+            <div class="stat-card animate-fadeInUp">
+                <div class="stat-icon">
+                    <i class="fas fa-rupee-sign"></i>
+                </div>
+                <div class="stat-number">₹{{ "{:,.0f}".format(fees|sum(attribute='amount') or 0) }}</div>
+                <div class="stat-label">Total Collected</div>
+            </div>
+
+            <div class="stat-card animate-fadeInUp">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-number">{{ fees|selectattr('status', 'equalto', 'paid')|list|length }}</div>
+                <div class="stat-label">Paid Fees</div>
+            </div>
+
+            <div class="stat-card animate-fadeInUp">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-number">{{ fees|selectattr('status', 'equalto', 'pending')|list|length }}</div>
+                <div class="stat-label">Pending Fees</div>
+            </div>
+
+            <div class="stat-card animate-fadeInUp">
+                <div class="stat-icon">
+                    <i class="fas fa-receipt"></i>
+                </div>
+                <div class="stat-number">{{ fees|length }}</div>
+                <div class="stat-label">Total Receipts</div>
+            </div>
+        </div>
+
+        <!-- Search and Filter Section -->
+        <div class="search-section">
+            <form class="search-form" id="searchForm">
+                <div class="form-group">
+                    <label class="form-label">Search Fees</label>
+                    <div class="search-input">
+                        <i class="fas fa-search"></i>
+                        <input type="text" class="form-control" id="searchInput" placeholder="Search by student ID, receipt number...">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Filter by Status</label>
+                    <select class="form-control" id="statusFilter">
+                        <option value="">All Status</option>
+                        <option value="paid">Paid</option>
+                        <option value="pending">Pending</option>
+                        <option value="overdue">Overdue</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Filter by Fee Type</label>
+                    <select class="form-control" id="feeTypeFilter">
+                        <option value="">All Types</option>
+                        <option value="tuition">Tuition Fee</option>
+                        <option value="hostel">Hostel Fee</option>
+                        <option value="library">Library Fee</option>
+                        <option value="exam">Exam Fee</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Date Range</label>
+                    <input type="date" class="form-control" id="dateFilter">
+                </div>
+                
+                <div class="form-group">
+                    <button type="button" class="btn btn-primary" onclick="filterFees()">
+                        <i class="fas fa-filter"></i> Apply Filters
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Fees Section -->
+        <div class="fees-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-receipt"></i> Fee Records
+                    <span class="badge" style="background: rgba(102, 126, 234, 0.1); color: #667eea; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; margin-left: 0.5rem;">
+                        {{ fees|length }} Records
+                    </span>
+                </h2>
+                <a href="{{ url_for('pay_fee') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Collect Fee
+                </a>
+            </div>
+
+            {% if fees %}
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Receipt No.</th>
+                            <th>Student ID</th>
+                            <th>Fee Type</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Payment Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="feesTableBody">
+                        {% for fee in fees %}
+                        <tr class="fee-row" 
+                            data-student="{{ fee.student_id.lower() }}" 
+                            data-status="{{ fee.status }}" 
+                            data-type="{{ fee.fee_type.lower() }}"
+                            data-date="{{ fee.payment_date.strftime('%Y-%m-%d') }}">
+                            <td>
+                                <span class="receipt-number">{{ fee.receipt_number }}</span>
+                            </td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <div style="width: 35px; height: 35px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.8rem;">
+                                        {{ fee.student_id[-2:] }}
+                                    </div>
+                                    <span style="font-weight: 600; color: #333;">{{ fee.student_id }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="fee-type-badge">{{ fee.fee_type }}</span>
+                            </td>
+                            <td>
+                                <span class="amount-display 
+                                    {% if fee.status == 'paid' %}amount-paid
+                                    {% elif fee.status == 'pending' %}amount-pending
+                                    {% else %}amount-overdue{% endif %}">
+                                    ₹{{ "{:,.0f}".format(fee.amount) }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="status-badge status-{{ fee.status }}">
+                                    {{ fee.status.title() }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="payment-date">
+                                    <i class="fas fa-calendar"></i>
+                                    {{ fee.payment_date.strftime('%b %d, %Y') }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-sm btn-view" onclick="viewReceipt('{{ fee.receipt_number }}')" title="View Receipt">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn-sm btn-print" onclick="printReceipt('{{ fee.receipt_number }}')" title="Print Receipt">
+                                        <i class="fas fa-print"></i>
+                                    </button>
+                                    <button class="btn-sm btn-send" onclick="sendReceipt('{{ fee.receipt_number }}')" title="Send via Email">
+                                        <i class="fas fa-envelope"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-credit-card"></i>
+                <h3>No Fee Records Found</h3>
+                <p>Start by collecting your first fee payment.</p>
+                <a href="{{ url_for('pay_fee') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Collect First Fee
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Receipt Modal -->
+<div id="receiptModal" class="receipt-modal">
+    <div class="receipt-content">
+        <span class="close-receipt" onclick="closeReceipt()">&times;</span>
+        <div id="receiptContent"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Filter and search functionality
+    function filterFees() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const statusFilter = document.getElementById('statusFilter').value;
+        const feeTypeFilter = document.getElementById('feeTypeFilter').value;
+        const dateFilter = document.getElementById('dateFilter').value;
+        
+        const rows = document.querySelectorAll('.fee-row');
+        let visibleCount = 0;
+        
+        rows.forEach(row => {
+            const student = row.dataset.student;
+            const status = row.dataset.status;
+            const type = row.dataset.type;
+            const date = row.dataset.date;
+            
+            const matchesSearch = student.includes(searchTerm) || 
+                                row.querySelector('.receipt-number').textContent.toLowerCase().includes(searchTerm);
+            const matchesStatus = !statusFilter || status === statusFilter;
+            const matchesType = !feeTypeFilter || type === feeTypeFilter.toLowerCase();
+            const matchesDate = !dateFilter || date === dateFilter;
+            
+            if (matchesSearch && matchesStatus && matchesType && matchesDate) {
+                row.style.display = '';
+                visibleCount++;
+                // Add animation
+                row.style.animation = 'fadeInUp 0.3s ease-out';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Update badge count
+        const badge = document.querySelector('.badge');
+        if (badge) {
+            badge.textContent = `${visibleCount} Records`;
+        }
+        
+        // Show empty state if no results
+        const tableBody = document.getElementById('feesTableBody');
+        if (visibleCount === 0) {
+            if (!document.querySelector('.no-results')) {
+                const noResults = document.createElement('tr');
+                noResults.className = 'no-results';
+                noResults.innerHTML = `
+                    <td colspan="7" style="text-align: center; padding: 3rem; color: #666;">
+                        <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 1rem; color: #ccc;"></i>
+                        <h3>No fee records found matching your criteria</h3>
+                        <p>Try adjusting your search terms or filters</p>
+                    </td>
+                `;
+                tableBody.appendChild(noResults);
+            }
+        } else {
+            const noResults = document.querySelector('.no-results');
+            if (noResults) {
+                noResults.remove();
+            }
+        }
+    }
+
+    // Real-time search
+    document.getElementById('searchInput').addEventListener('input', filterFees);
+    document.getElementById('statusFilter').addEventListener('change', filterFees);
+    document.getElementById('feeTypeFilter').addEventListener('change', filterFees);
+    document.getElementById('dateFilter').addEventListener('change', filterFees);
+
+    // View receipt
+    function viewReceipt(receiptNumber) {
+        // Find the fee data
+        const row = Array.from(document.querySelectorAll('.fee-row')).find(row => 
+            row.querySelector('.receipt-number').textContent === receiptNumber);
+        
+        if (row) {
+            const receiptNum = row.querySelector('.receipt-number').textContent;
+            const studentId = row.querySelector('td:nth-child(2) span').textContent;
+            const feeType = row.querySelector('.fee-type-badge').textContent;
+            const amount = row.querySelector('.amount-display').textContent;
+            const status = row.querySelector('.status-badge').textContent;
+            const paymentDate = row.querySelector('.payment-date').textContent.trim();
+            
+            const receiptContent = `
+                <div class="receipt-header">
+                    <div class="receipt-logo">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div class="receipt-title">College ERP System</div>
+                    <div class="receipt-subtitle">Fee Payment Receipt</div>
+                </div>
+                
+                <div class="receipt-details">
+                    <div class="receipt-item">
+                        <div class="receipt-label">Receipt Number</div>
+                        <div class="receipt-value">${receiptNum}</div>
+                    </div>
+                    <div class="receipt-item">
+                        <div class="receipt-label">Student ID</div>
+                        <div class="receipt-value">${studentId}</div>
+                    </div>
+                    <div class="receipt-item">
+                        <div class="receipt-label">Fee Type</div>
+                        <div class="receipt-value">${feeType}</div>
+                    </div>
+                    <div class="receipt-item">
+                        <div class="receipt-label">Payment Date</div>
+                        <div class="receipt-value">${paymentDate}</div>
+                    </div>
+                </div>
+                
+                <div class="receipt-amount">
+                    <div class="receipt-amount-label">Amount Paid</div>
+                    <div class="receipt-amount-value">${amount}</div>
+                </div>
+                
+                <div class="receipt-footer">
+                    <p>This is a computer generated receipt and does not require signature.</p>
+                    <p>Thank you for your payment!</p>
+                </div>
+            `;
+            
+            document.getElementById('receiptContent').innerHTML = receiptContent;
+            document.getElementById('receiptModal').style.display = 'block';
+        }
+    }
+
+    // Print receipt
+    function printReceipt(receiptNumber) {
+        viewReceipt(receiptNumber);
+        setTimeout(() => {
+            window.print();
+        }, 500);
+    }
+
+    // Send receipt via email
+    function sendReceipt(receiptNumber) {
+        // In a real application, this would make an API call to send email
+        alert(`Email functionality for receipt ${receiptNumber} would be implemented here.`);
+    }
+
+    // Close receipt modal
+    function closeReceipt() {
+        document.getElementById('receiptModal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('receiptModal');
+        if (event.target === modal) {
+            closeReceipt();
+        }
+    }
+
+    // Add animations to table rows
+    document.addEventListener('DOMContentLoaded', function() {
+        const rows = document.querySelectorAll('.fee-row');
+        rows.forEach((row, index) => {
+            row.style.animationDelay = `${index * 0.05}s`;
+            row.classList.add('animate-fadeInUp');
+        });
+        
+        // Animate stats cards
+        const statCards = document.querySelectorAll('.stat-card');
+        statCards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+            card.classList.add('animate-fadeInUp');
+        });
+    });
+
+    // Add hover effects
+    document.querySelectorAll('.fee-row').forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+            this.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
+        });
+        
+        row.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = 'none';
+        });
+    });
+
+    // Real-time updates simulation
+    function simulateLiveUpdates() {
+        setInterval(() => {
+            // Update stats randomly
+            const statNumbers = document.querySelectorAll('.stat-number');
+            statNumbers.forEach(stat => {
+                const current = parseInt(stat.textContent.replace(/[^\d]/g, ''));
+                const change = Math.floor(Math.random() * 2); // 0 or 1
+                const newValue = current + change;
+                
+                if (change > 0) {
+                    stat.textContent = stat.textContent.replace(/\d+/, newValue);
+                    
+                    // Add pulse effect
+                    stat.style.animation = 'none';
+                    setTimeout(() => {
+                        stat.style.animation = 'pulse 0.5s ease-out';
+                    }, 10);
+                }
+            });
+        }, 15000); // Update every 15 seconds
+    }
+
+    // Start live updates
+    document.addEventListener('DOMContentLoaded', function() {
+        simulateLiveUpdates();
+    });
+
+    // Print styles for receipt
+    const printStyles = `
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .receipt-content, .receipt-content * {
+                visibility: visible;
+            }
+            .receipt-content {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                box-shadow: none;
+                margin: 0;
+            }
+            .close-receipt {
+                display: none;
+            }
+        }
+    `;
+    
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = printStyles;
+    document.head.appendChild(styleSheet);
+</script>
+{% endblock %}

@@ -1,0 +1,810 @@
+{% extends "base.html" %}
+
+{% block title %}AI Chatbot - College ERP System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chatbot-container {
+        padding: 2rem 0;
+        min-height: calc(100vh - 80px);
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        animation: fadeInDown 1s ease-out;
+    }
+
+    .page-title {
+        font-size: 3rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+    }
+
+    .page-subtitle {
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 400;
+    }
+
+    /* Chat Interface */
+    .chat-interface {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 0;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideInUp 0.8s ease-out;
+        max-width: 800px;
+        margin: 0 auto;
+        height: 600px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chat-header {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 1.5rem 2rem;
+        border-radius: 20px 20px 0 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .chat-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .chat-header-info h3 {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .chat-header-info p {
+        margin: 0;
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+
+    .chat-status {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .status-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #56ab2f;
+        animation: pulse 2s infinite;
+    }
+
+    /* Chat Messages */
+    .chat-messages {
+        flex: 1;
+        padding: 1.5rem;
+        overflow-y: auto;
+        background: #f8f9fa;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .message {
+        display: flex;
+        gap: 0.75rem;
+        max-width: 80%;
+        animation: slideInUp 0.3s ease-out;
+    }
+
+    .message.user {
+        align-self: flex-end;
+        flex-direction: row-reverse;
+    }
+
+    .message.bot {
+        align-self: flex-start;
+    }
+
+    .message-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    .message.user .message-avatar {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+
+    .message.bot .message-avatar {
+        background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+        color: white;
+    }
+
+    .message-content {
+        background: white;
+        padding: 1rem 1.5rem;
+        border-radius: 18px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        position: relative;
+        word-wrap: break-word;
+    }
+
+    .message.user .message-content {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+
+    .message.bot .message-content {
+        background: white;
+        color: #333;
+        border: 1px solid #e9ecef;
+    }
+
+    .message-text {
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    .message-time {
+        font-size: 0.7rem;
+        opacity: 0.7;
+        margin-top: 0.5rem;
+        text-align: right;
+    }
+
+    .message.user .message-time {
+        text-align: left;
+    }
+
+    /* Typing Indicator */
+    .typing-indicator {
+        display: none;
+        align-items: center;
+        gap: 0.75rem;
+        max-width: 80%;
+        align-self: flex-start;
+    }
+
+    .typing-indicator.show {
+        display: flex;
+        animation: slideInUp 0.3s ease-out;
+    }
+
+    .typing-dots {
+        background: white;
+        border: 1px solid #e9ecef;
+        padding: 1rem 1.5rem;
+        border-radius: 18px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        display: flex;
+        gap: 0.25rem;
+    }
+
+    .typing-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #667eea;
+        animation: typing 1.4s infinite ease-in-out;
+    }
+
+    .typing-dot:nth-child(1) { animation-delay: 0s; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    /* Chat Input */
+    .chat-input {
+        padding: 1.5rem;
+        background: white;
+        border-radius: 0 0 20px 20px;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .input-container {
+        display: flex;
+        gap: 1rem;
+        align-items: end;
+    }
+
+    .message-input {
+        flex: 1;
+        padding: 1rem 1.5rem;
+        border: 2px solid #e9ecef;
+        border-radius: 25px;
+        font-size: 1rem;
+        resize: none;
+        max-height: 100px;
+        transition: all 0.3s ease;
+        font-family: inherit;
+    }
+
+    .message-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .send-button {
+        width: 50px;
+        height: 50px;
+        border: none;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .send-button:hover {
+        transform: scale(1.1);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .send-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .quick-action {
+        padding: 0.5rem 1rem;
+        background: rgba(102, 126, 234, 0.1);
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        border-radius: 20px;
+        color: #667eea;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .quick-action:hover {
+        background: #667eea;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    /* Chat Features */
+    .chat-features {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-top: 2rem;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideInUp 0.8s ease-out;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+    }
+
+    .feature-card {
+        text-align: center;
+        padding: 1.5rem;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 16px;
+        border: 2px solid rgba(102, 126, 234, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        border-color: #667eea;
+    }
+
+    .feature-icon {
+        font-size: 2.5rem;
+        color: #667eea;
+        margin-bottom: 1rem;
+    }
+
+    .feature-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+
+    .feature-description {
+        color: #666;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .chat-interface {
+            margin: 0 1rem;
+            height: 500px;
+        }
+
+        .chat-header {
+            padding: 1rem;
+        }
+
+        .chat-messages {
+            padding: 1rem;
+        }
+
+        .message {
+            max-width: 90%;
+        }
+
+        .chat-input {
+            padding: 1rem;
+        }
+
+        .input-container {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .send-button {
+            align-self: flex-end;
+        }
+
+        .features-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Animations */
+    @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes typing {
+        0%, 60%, 100% {
+            transform: translateY(0);
+        }
+        30% {
+            transform: translateY(-10px);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    /* Welcome Message */
+    .welcome-message {
+        text-align: center;
+        padding: 2rem;
+        color: #666;
+    }
+
+    .welcome-icon {
+        font-size: 3rem;
+        color: #667eea;
+        margin-bottom: 1rem;
+    }
+
+    .welcome-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+
+    .welcome-text {
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chatbot-container">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-robot"></i> AI Assistant
+            </h1>
+            <p class="page-subtitle">Get instant help with your college queries using our intelligent chatbot</p>
+        </div>
+
+        <!-- Chat Interface -->
+        <div class="chat-interface">
+            <div class="chat-header">
+                <div class="chat-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="chat-header-info">
+                    <h3>College ERP Assistant</h3>
+                    <p>AI-powered help for all your queries</p>
+                </div>
+                <div class="chat-status">
+                    <div class="status-indicator"></div>
+                    <span>Online</span>
+                </div>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="welcome-message">
+                    <div class="welcome-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <div class="welcome-title">Welcome to AI Assistant!</div>
+                    <div class="welcome-text">
+                        I'm here to help you with admissions, fees, hostel, exams, attendance, and more. 
+                        How can I assist you today?
+                    </div>
+                </div>
+
+                <div class="quick-actions">
+                    <div class="quick-action" onclick="sendQuickMessage('How do I pay my fees?')">
+                        <i class="fas fa-credit-card"></i> Fee Payment
+                    </div>
+                    <div class="quick-action" onclick="sendQuickMessage('Check my attendance')">
+                        <i class="fas fa-calendar-check"></i> Attendance
+                    </div>
+                    <div class="quick-action" onclick="sendQuickMessage('Hostel information')">
+                        <i class="fas fa-bed"></i> Hostel
+                    </div>
+                    <div class="quick-action" onclick="sendQuickMessage('Exam schedule')">
+                        <i class="fas fa-calendar"></i> Exams
+                    </div>
+                    <div class="quick-action" onclick="sendQuickMessage('Academic calendar')">
+                        <i class="fas fa-calendar-alt"></i> Calendar
+                    </div>
+                </div>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="message-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+
+            <div class="chat-input">
+                <div class="input-container">
+                    <textarea 
+                        class="message-input" 
+                        id="messageInput" 
+                        placeholder="Type your message here..."
+                        rows="1"
+                        onkeypress="handleKeyPress(event)"
+                    ></textarea>
+                    <button class="send-button" id="sendButton" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Features -->
+        <div class="chat-features">
+            <h2 style="text-align: center; margin-bottom: 2rem; color: #333; font-weight: 700;">
+                <i class="fas fa-star"></i> AI Assistant Features
+            </h2>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div class="feature-title">Academic Support</div>
+                    <div class="feature-description">
+                        Get help with course information, exam schedules, grade inquiries, and academic policies.
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <div class="feature-title">Fee Management</div>
+                    <div class="feature-description">
+                        Check fee status, payment methods, due dates, and get assistance with fee-related queries.
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bed"></i>
+                    </div>
+                    <div class="feature-title">Hostel Services</div>
+                    <div class="feature-description">
+                        Information about room allocation, hostel rules, facilities, and maintenance requests.
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="feature-title">Attendance Tracking</div>
+                    <div class="feature-description">
+                        Check attendance records, attendance policies, and get notifications about low attendance.
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <div class="feature-title">Technical Support</div>
+                    <div class="feature-description">
+                        Get help with system login, password reset, technical issues, and platform navigation.
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <div class="feature-title">General Queries</div>
+                    <div class="feature-description">
+                        Ask about college facilities, events, policies, procedures, and general information.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let isTyping = false;
+
+    // Send message function
+    function sendMessage() {
+        const messageInput = document.getElementById('messageInput');
+        const message = messageInput.value.trim();
+        
+        if (message === '') return;
+        
+        // Add user message to chat
+        addMessage(message, 'user');
+        
+        // Clear input
+        messageInput.value = '';
+        messageInput.style.height = 'auto';
+        
+        // Show typing indicator
+        showTypingIndicator();
+        
+        // Simulate bot response
+        setTimeout(() => {
+            hideTypingIndicator();
+            const botResponse = generateBotResponse(message);
+            addMessage(botResponse, 'bot');
+        }, 1500);
+    }
+
+    // Send quick message
+    function sendQuickMessage(message) {
+        document.getElementById('messageInput').value = message;
+        sendMessage();
+    }
+
+    // Add message to chat
+    function addMessage(text, sender) {
+        const chatMessages = document.getElementById('chatMessages');
+        
+        // Remove welcome message if it exists
+        const welcomeMessage = chatMessages.querySelector('.welcome-message');
+        if (welcomeMessage) {
+            welcomeMessage.remove();
+        }
+        
+        // Remove quick actions if it's the first user message
+        const quickActions = chatMessages.querySelector('.quick-actions');
+        if (quickActions && sender === 'user') {
+            quickActions.remove();
+        }
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${sender}`;
+        
+        const avatar = sender === 'user' ? 
+            '<div class="message-avatar">' + (session.username ? session.username[0].toUpperCase() : 'U') + '</div>' :
+            '<div class="message-avatar"><i class="fas fa-robot"></i></div>';
+        
+        const time = new Date().toLocaleTimeString('en-US', { 
+            hour12: true, 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        });
+        
+        messageDiv.innerHTML = `
+            ${avatar}
+            <div class="message-content">
+                <p class="message-text">${text}</p>
+                <div class="message-time">${time}</div>
+            </div>
+        `;
+        
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Generate bot response
+    function generateBotResponse(userMessage) {
+        const message = userMessage.toLowerCase();
+        
+        // Fee-related responses
+        if (message.includes('fee') || message.includes('payment')) {
+            return "I can help you with fee-related queries! You can pay your fees online through the fee collection section, or visit the finance office. The current fee structure and due dates are available in your dashboard. Would you like me to show you how to make a payment?";
+        }
+        
+        // Attendance-related responses
+        if (message.includes('attendance') || message.includes('present')) {
+            return "Your attendance is tracked automatically through our smart attendance system. You can view your attendance records in the attendance section. The minimum attendance required is 75% to appear for exams. Is there anything specific about attendance you'd like to know?";
+        }
+        
+        // Hostel-related responses
+        if (message.includes('hostel') || message.includes('room')) {
+            return "For hostel-related queries, you can check room allocation, occupancy status, and submit maintenance requests through the hostel management section. Hostel fees and rules are also available there. What specific hostel information do you need?";
+        }
+        
+        // Exam-related responses
+        if (message.includes('exam') || message.includes('schedule')) {
+            return "Exam schedules and timetables are available in the examination section. You can view upcoming exams, check results, and access academic calendars. The timetable is updated regularly, so make sure to check for any changes. Need help with something specific about exams?";
+        }
+        
+        // Academic-related responses
+        if (message.includes('course') || message.includes('subject') || message.includes('academic')) {
+            return "For academic information, you can check your course details, subject information, and academic calendar in the respective sections. Course materials and announcements are also available. Is there a specific academic query I can help you with?";
+        }
+        
+        // Technical support
+        if (message.includes('login') || message.includes('password') || message.includes('technical')) {
+            return "For technical issues, you can reset your password using the 'Forgot Password' option on the login page. If you're experiencing other technical problems, please contact the IT support team or try refreshing the page. What specific technical issue are you facing?";
+        }
+        
+        // General greetings
+        if (message.includes('hello') || message.includes('hi') || message.includes('hey')) {
+            return "Hello! I'm your AI assistant for the College ERP System. I can help you with admissions, fees, hostel, exams, attendance, and general queries. What can I assist you with today?";
+        }
+        
+        // Default response
+        const responses = [
+            "I understand you're asking about: '" + userMessage + "'. While I can help with most college-related queries, could you please provide more specific details? I'm here to assist with admissions, fees, hostel, exams, attendance, and general information.",
+            "That's an interesting question! I'm designed to help with college ERP system queries. If you need information about fees, attendance, hostel, exams, or academic matters, I can provide detailed assistance. Could you rephrase your question?",
+            "I'm here to help with your college queries! I can assist with admissions, fee payments, hostel information, exam schedules, attendance tracking, and general college policies. What specific information are you looking for?",
+            "Thank you for your question! I specialize in helping students with college ERP system queries. For the best assistance, please ask about specific topics like fees, attendance, hostel, exams, or academic matters. How can I help you further?"
+        ];
+        
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    // Show typing indicator
+    function showTypingIndicator() {
+        isTyping = true;
+        document.getElementById('typingIndicator').classList.add('show');
+        document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+    }
+
+    // Hide typing indicator
+    function hideTypingIndicator() {
+        isTyping = false;
+        document.getElementById('typingIndicator').classList.remove('show');
+    }
+
+    // Handle key press
+    function handleKeyPress(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            sendMessage();
+        }
+    }
+
+    // Auto-resize textarea
+    document.getElementById('messageInput').addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+    });
+
+    // Add some sample conversations on load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add welcome message after a delay
+        setTimeout(() => {
+            if (document.querySelector('.welcome-message')) {
+                addMessage("Hello! I'm your AI assistant. I can help you with various college-related queries. Feel free to ask me anything about admissions, fees, hostel, exams, or attendance!", 'bot');
+            }
+        }, 2000);
+    });
+
+    // Add animations to elements
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate feature cards
+        const featureCards = document.querySelectorAll('.feature-card');
+        featureCards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+            card.classList.add('animate-fadeInUp');
+        });
+
+        // Add hover effects to quick actions
+        const quickActions = document.querySelectorAll('.quick-action');
+        quickActions.forEach(action => {
+            action.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px) scale(1.05)';
+            });
+            
+            action.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+    });
+
+    // Simulate online status
+    function updateOnlineStatus() {
+        const statusIndicator = document.querySelector('.status-indicator');
+        const statusText = document.querySelector('.chat-status span');
+        
+        // Randomly change status (simulation)
+        if (Math.random() < 0.1) { // 10% chance
+            statusIndicator.style.background = '#ffc107';
+            statusText.textContent = 'Away';
+            
+            setTimeout(() => {
+                statusIndicator.style.background = '#56ab2f';
+                statusText.textContent = 'Online';
+            }, 3000);
+        }
+    }
+
+    // Update status every 30 seconds
+    setInterval(updateOnlineStatus, 30000);
+</script>
+{% endblock %}

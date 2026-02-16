@@ -1,0 +1,988 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics & Predictions - College ERP System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .analytics-container {
+        padding: 2rem 0;
+        min-height: calc(100vh - 80px);
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        animation: fadeInDown 1s ease-out;
+    }
+
+    .page-title {
+        font-size: 3rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+    }
+
+    .page-subtitle {
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 400;
+    }
+
+    /* Analytics Tabs */
+    .analytics-tabs {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 3rem;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideInUp 0.8s ease-out;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .management-tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid #f0f0f0;
+        flex-wrap: wrap;
+    }
+
+    .management-tab {
+        padding: 1rem 2rem;
+        border: none;
+        background: none;
+        color: #666;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-bottom: 3px solid transparent;
+    }
+
+    .management-tab.active {
+        color: #667eea;
+        border-bottom-color: #667eea;
+    }
+
+    .management-tab:hover {
+        color: #667eea;
+    }
+
+    .management-content {
+        display: none;
+    }
+
+    .management-content.active {
+        display: block;
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    /* Risk Analysis Section */
+    .risk-analysis {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .risk-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .risk-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.3s ease;
+    }
+
+    .risk-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.15);
+    }
+
+    .risk-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .risk-card.high-risk {
+        border-left: 6px solid #ff416c;
+    }
+
+    .risk-card.medium-risk {
+        border-left: 6px solid #ffc107;
+    }
+
+    .risk-card.low-risk {
+        border-left: 6px solid #56ab2f;
+    }
+
+    .risk-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .student-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .student-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .student-details h3 {
+        margin: 0;
+        font-size: 1.2rem;
+        color: #333;
+    }
+
+    .student-details p {
+        margin: 0;
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .risk-score {
+        font-size: 2rem;
+        font-weight: 800;
+        padding: 0.5rem 1rem;
+        border-radius: 12px;
+        text-align: center;
+    }
+
+    .risk-score.high {
+        background: rgba(255, 65, 108, 0.1);
+        color: #ff416c;
+    }
+
+    .risk-score.medium {
+        background: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+    }
+
+    .risk-score.low {
+        background: rgba(86, 171, 47, 0.1);
+        color: #56ab2f;
+    }
+
+    .risk-factors {
+        margin-top: 1rem;
+    }
+
+    .risk-factor {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .risk-factor:last-child {
+        border-bottom: none;
+    }
+
+    .factor-label {
+        font-weight: 500;
+        color: #333;
+    }
+
+    .factor-value {
+        font-weight: 600;
+        padding: 0.25rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.8rem;
+    }
+
+    .factor-high {
+        background: rgba(255, 65, 108, 0.1);
+        color: #ff416c;
+    }
+
+    .factor-medium {
+        background: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+    }
+
+    .factor-low {
+        background: rgba(86, 171, 47, 0.1);
+        color: #56ab2f;
+    }
+
+    /* Performance Charts */
+    .performance-charts {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .chart-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideInUp 0.8s ease-out;
+    }
+
+    .chart-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .chart-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+
+    .chart-subtitle {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    /* Attendance Trend Chart */
+    .attendance-trend {
+        height: 300px;
+        display: flex;
+        align-items: end;
+        justify-content: space-around;
+        padding: 1rem;
+        background: rgba(102, 126, 234, 0.05);
+        border-radius: 12px;
+        margin-bottom: 1rem;
+    }
+
+    .trend-bar {
+        width: 40px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 4px 4px 0 0;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .trend-bar:hover {
+        transform: scaleY(1.1);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .trend-bar::after {
+        content: attr(data-value);
+        position: absolute;
+        top: -30px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #667eea;
+    }
+
+    /* GPA Distribution */
+    .gpa-distribution {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .gpa-range {
+        text-align: center;
+        padding: 1rem;
+        border-radius: 12px;
+        background: rgba(102, 126, 234, 0.05);
+        border: 2px solid rgba(102, 126, 234, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .gpa-range:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+    }
+
+    .gpa-range-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+
+    .gpa-range-count {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #667eea;
+    }
+
+    /* Predictions Section */
+    .predictions-section {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideInUp 0.8s ease-out;
+        margin-bottom: 3rem;
+    }
+
+    .prediction-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 12px;
+        border-left: 4px solid #667eea;
+        transition: all 0.3s ease;
+    }
+
+    .prediction-item:hover {
+        transform: translateX(10px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .prediction-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+    }
+
+    .prediction-content {
+        flex: 1;
+    }
+
+    .prediction-title {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.25rem;
+    }
+
+    .prediction-description {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .prediction-confidence {
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 0.25rem 0.75rem;
+        border-radius: 8px;
+        display: inline-block;
+    }
+
+    .confidence-high {
+        background: rgba(86, 171, 47, 0.1);
+        color: #56ab2f;
+    }
+
+    .confidence-medium {
+        background: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+    }
+
+    .confidence-low {
+        background: rgba(255, 65, 108, 0.1);
+        color: #ff416c;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 150px;
+        justify-content: center;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+        color: white;
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(86, 171, 47, 0.3);
+    }
+
+    .btn-warning {
+        background: linear-gradient(135deg, #ffc107, #ff9800);
+        color: white;
+    }
+
+    .btn-warning:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(255, 193, 7, 0.3);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .risk-analysis {
+            grid-template-columns: 1fr;
+        }
+
+        .performance-charts {
+            grid-template-columns: 1fr;
+        }
+
+        .management-tabs {
+            flex-wrap: wrap;
+        }
+
+        .gpa-distribution {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+    }
+
+    /* Animations */
+    @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideInUp {
+        from { opacity: 0; transform: translateY(50px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Loading States */
+    .loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="analytics-container">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-chart-line"></i> Analytics & Predictions
+            </h1>
+            <p class="page-subtitle">AI-powered insights and predictive analytics for student success</p>
+        </div>
+
+        <!-- Analytics Tabs -->
+        <div class="analytics-tabs">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-brain"></i> Predictive Analytics Dashboard
+                </h2>
+                <button class="btn btn-primary" onclick="refreshAnalytics()">
+                    <i class="fas fa-sync-alt"></i> Refresh Data
+                </button>
+            </div>
+
+            <div class="management-tabs">
+                <button class="management-tab active" onclick="showAnalyticsTab('risk')">Risk Analysis</button>
+                <button class="management-tab" onclick="showAnalyticsTab('performance')">Performance Trends</button>
+                <button class="management-tab" onclick="showAnalyticsTab('predictions')">ML Predictions</button>
+                <button class="management-tab" onclick="showAnalyticsTab('recommendations')">Recommendations</button>
+            </div>
+
+            <!-- Risk Analysis Tab -->
+            <div class="management-content active" id="riskTab">
+                <h3 style="margin-bottom: 2rem; color: #333; font-weight: 700;">Students at Risk Analysis</h3>
+                
+                <div class="risk-analysis">
+                    {% for student in risk_data %}
+                    <div class="risk-card {{ 'high-risk' if student.risk_score > 0.7 else 'medium-risk' if student.risk_score > 0.4 else 'low-risk' }}">
+                        <div class="risk-header">
+                            <div class="student-info">
+                                <div class="student-avatar">{{ student.name[0].upper() }}</div>
+                                <div class="student-details">
+                                    <h3>{{ student.name }}</h3>
+                                    <p>{{ student.student_id }} • Year {{ student.year if student.year else 2 }}</p>
+                                </div>
+                            </div>
+                            <div class="risk-score {{ 'high' if student.risk_score > 0.7 else 'medium' if student.risk_score > 0.4 else 'low' }}">
+                                {{ "%.1f"|format(student.risk_score * 100) }}%
+                            </div>
+                        </div>
+                        
+                        <div class="risk-factors">
+                            <div class="risk-factor">
+                                <span class="factor-label">Attendance Rate</span>
+                                <span class="factor-value {{ 'factor-high' if student.attendance < 75 else 'factor-medium' if student.attendance < 85 else 'factor-low' }}">
+                                    {{ "%.1f"|format(student.attendance) }}%
+                                </span>
+                            </div>
+                            <div class="risk-factor">
+                                <span class="factor-label">Academic Performance</span>
+                                <span class="factor-value {{ 'factor-high' if student.gpa < 6.0 else 'factor-medium' if student.gpa < 7.5 else 'factor-low' }}">
+                                    {{ "%.2f"|format(student.gpa) }} GPA
+                                </span>
+                            </div>
+                            <div class="risk-factor">
+                                <span class="factor-label">Engagement Level</span>
+                                <span class="factor-value {{ 'factor-high' if student.risk_score > 0.7 else 'factor-medium' if student.risk_score > 0.4 else 'factor-low' }}">
+                                    {{ 'Low' if student.risk_score > 0.7 else 'Medium' if student.risk_score > 0.4 else 'High' }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Performance Trends Tab -->
+            <div class="management-content" id="performanceTab">
+                <h3 style="margin-bottom: 2rem; color: #333; font-weight: 700;">Performance Analytics</h3>
+                
+                <div class="performance-charts">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h4 class="chart-title">Attendance Trends</h4>
+                            <p class="chart-subtitle">Monthly attendance patterns</p>
+                        </div>
+                        <div class="attendance-trend">
+                            <div class="trend-bar" style="height: 60%;" data-value="85%"></div>
+                            <div class="trend-bar" style="height: 75%;" data-value="88%"></div>
+                            <div class="trend-bar" style="height: 70%;" data-value="82%"></div>
+                            <div class="trend-bar" style="height: 90%;" data-value="92%"></div>
+                            <div class="trend-bar" style="height: 85%;" data-value="87%"></div>
+                            <div class="trend-bar" style="height: 95%;" data-value="94%"></div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h4 class="chart-title">GPA Distribution</h4>
+                            <p class="chart-subtitle">Grade point average distribution</p>
+                        </div>
+                        <div class="gpa-distribution">
+                            <div class="gpa-range">
+                                <div class="gpa-range-label">9.0-10.0</div>
+                                <div class="gpa-range-count">12</div>
+                            </div>
+                            <div class="gpa-range">
+                                <div class="gpa-range-label">8.0-8.9</div>
+                                <div class="gpa-range-count">28</div>
+                            </div>
+                            <div class="gpa-range">
+                                <div class="gpa-range-label">7.0-7.9</div>
+                                <div class="gpa-range-count">45</div>
+                            </div>
+                            <div class="gpa-range">
+                                <div class="gpa-range-label">6.0-6.9</div>
+                                <div class="gpa-range-count">32</div>
+                            </div>
+                            <div class="gpa-range">
+                                <div class="gpa-range-label">Below 6.0</div>
+                                <div class="gpa-range-count">8</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ML Predictions Tab -->
+            <div class="management-content" id="predictionsTab">
+                <h3 style="margin-bottom: 2rem; color: #333; font-weight: 700;">Machine Learning Predictions</h3>
+                
+                <div class="predictions-section">
+                    <div class="prediction-item">
+                        <div class="prediction-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <div class="prediction-content">
+                            <div class="prediction-title">Graduation Success Prediction</div>
+                            <div class="prediction-description">Based on current academic performance and attendance patterns, 87% of students are predicted to graduate successfully.</div>
+                            <span class="prediction-confidence confidence-high">High Confidence (94%)</span>
+                        </div>
+                    </div>
+
+                    <div class="prediction-item">
+                        <div class="prediction-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="prediction-content">
+                            <div class="prediction-title">Performance Improvement Trend</div>
+                            <div class="prediction-description">Students showing consistent improvement in attendance and grades are likely to maintain upward trajectory.</div>
+                            <span class="prediction-confidence confidence-medium">Medium Confidence (78%)</span>
+                        </div>
+                    </div>
+
+                    <div class="prediction-item">
+                        <div class="prediction-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="prediction-content">
+                            <div class="prediction-title">Early Warning System</div>
+                            <div class="prediction-description">Identified 15 students at risk of academic failure based on attendance, grades, and engagement metrics.</div>
+                            <span class="prediction-confidence confidence-high">High Confidence (89%)</span>
+                        </div>
+                    </div>
+
+                    <div class="prediction-item">
+                        <div class="prediction-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="prediction-content">
+                            <div class="prediction-title">Peer Group Analysis</div>
+                            <div class="prediction-description">Students in study groups show 23% higher success rates compared to individual learners.</div>
+                            <span class="prediction-confidence confidence-medium">Medium Confidence (71%)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendations Tab -->
+            <div class="management-content" id="recommendationsTab">
+                <h3 style="margin-bottom: 2rem; color: #333; font-weight: 700;">AI-Generated Recommendations</h3>
+                
+                <div class="predictions-section">
+                    <div class="prediction-item">
+                        <div class="prediction-icon">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <div class="prediction-content">
+                            <div class="prediction-title">Intervention Strategies</div>
+                            <div class="prediction-description">Implement peer mentoring program for at-risk students and provide additional academic support resources.</div>
+                            <span class="prediction-confidence confidence-high">Priority: High</span>
+                        </div>
+                    </div>
+
+                    <div class="prediction-item">
+                        <div class="prediction-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="prediction-content">
+                            <div class="prediction-title">Schedule Optimization</div>
+                            <div class="prediction-description">Adjust class timings for subjects with low attendance rates and consider flexible learning options.</div>
+                            <span class="prediction-confidence confidence-medium">Priority: Medium</span>
+                        </div>
+                    </div>
+
+                    <div class="prediction-item">
+                        <div class="prediction-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <div class="prediction-content">
+                            <div class="prediction-title">Resource Allocation</div>
+                            <div class="prediction-description">Allocate more resources to Computer Science department showing highest success rates and student satisfaction.</div>
+                            <span class="prediction-confidence confidence-high">Priority: High</span>
+                        </div>
+                    </div>
+
+                    <div class="prediction-item">
+                        <div class="prediction-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="prediction-content">
+                            <div class="prediction-title">Wellness Programs</div>
+                            <div class="prediction-description">Introduce mental health support programs and stress management workshops for students with high risk scores.</div>
+                            <span class="prediction-confidence confidence-medium">Priority: Medium</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="generateReport()">
+                <i class="fas fa-file-pdf"></i> Generate Analytics Report
+            </button>
+            <button class="btn btn-success" onclick="exportData()">
+                <i class="fas fa-download"></i> Export Data
+            </button>
+            <button class="btn btn-warning" onclick="scheduleInterventions()">
+                <i class="fas fa-calendar-check"></i> Schedule Interventions
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Tab navigation
+    function showAnalyticsTab(tabName) {
+        // Hide all management content
+        document.querySelectorAll('.management-content').forEach(content => {
+            content.classList.remove('active');
+        });
+
+        // Remove active class from all tabs
+        document.querySelectorAll('.management-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+
+        // Show selected tab content
+        document.getElementById(`${tabName}Tab`).classList.add('active');
+        
+        // Add active class to clicked tab
+        event.target.classList.add('active');
+    }
+
+    // Analytics actions
+    function refreshAnalytics() {
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        
+        btn.innerHTML = '<span class="spinner"></span> Refreshing...';
+        btn.disabled = true;
+
+        // Simulate data refresh
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            
+            // Update risk scores randomly
+            updateRiskScores();
+            
+            // Update performance charts
+            updatePerformanceCharts();
+            
+            alert('Analytics data refreshed successfully!');
+        }, 2000);
+    }
+
+    function updateRiskScores() {
+        const riskScores = document.querySelectorAll('.risk-score');
+        riskScores.forEach(score => {
+            const currentScore = parseFloat(score.textContent);
+            const change = (Math.random() - 0.5) * 10; // -5 to 5
+            const newScore = Math.max(0, Math.min(100, currentScore + change));
+            
+            score.textContent = newScore.toFixed(1) + '%';
+            
+            // Update risk level
+            const card = score.closest('.risk-card');
+            card.classList.remove('high-risk', 'medium-risk', 'low-risk');
+            score.classList.remove('high', 'medium', 'low');
+            
+            if (newScore > 70) {
+                card.classList.add('high-risk');
+                score.classList.add('high');
+            } else if (newScore > 40) {
+                card.classList.add('medium-risk');
+                score.classList.add('medium');
+            } else {
+                card.classList.add('low-risk');
+                score.classList.add('low');
+            }
+        });
+    }
+
+    function updatePerformanceCharts() {
+        // Update attendance trend bars
+        const trendBars = document.querySelectorAll('.trend-bar');
+        trendBars.forEach(bar => {
+            const currentHeight = parseFloat(bar.style.height);
+            const change = (Math.random() - 0.5) * 20; // -10 to 10
+            const newHeight = Math.max(20, Math.min(100, currentHeight + change));
+            
+            bar.style.height = newHeight + '%';
+            bar.setAttribute('data-value', Math.round(newHeight) + '%');
+        });
+
+        // Update GPA distribution
+        const gpaCounts = document.querySelectorAll('.gpa-range-count');
+        gpaCounts.forEach(count => {
+            const currentCount = parseInt(count.textContent);
+            const change = Math.floor((Math.random() - 0.5) * 6); // -3 to 3
+            const newCount = Math.max(0, currentCount + change);
+            
+            count.textContent = newCount;
+        });
+    }
+
+    function generateReport() {
+        alert('Generating comprehensive analytics report... This would create a detailed PDF report with all analytics data.');
+    }
+
+    function exportData() {
+        alert('Exporting analytics data to CSV/JSON format... This would allow further analysis in external tools.');
+    }
+
+    function scheduleInterventions() {
+        alert('Scheduling intervention programs for at-risk students... This would create calendar events and notify relevant staff.');
+    }
+
+    // Add animations to elements
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate risk cards
+        const riskCards = document.querySelectorAll('.risk-card');
+        riskCards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+            card.classList.add('animate-fadeInUp');
+        });
+
+        // Animate chart containers
+        const chartContainers = document.querySelectorAll('.chart-container');
+        chartContainers.forEach((container, index) => {
+            container.style.animationDelay = `${index * 0.2}s`;
+            container.classList.add('animate-fadeInUp');
+        });
+
+        // Animate prediction items
+        const predictionItems = document.querySelectorAll('.prediction-item');
+        predictionItems.forEach((item, index) => {
+            item.style.animationDelay = `${index * 0.1}s`;
+            item.classList.add('animate-fadeInUp');
+        });
+
+        // Add hover effects to trend bars
+        const trendBars = document.querySelectorAll('.trend-bar');
+        trendBars.forEach(bar => {
+            bar.addEventListener('mouseenter', function() {
+                this.style.transform = 'scaleY(1.1)';
+                this.style.boxShadow = '0 8px 25px rgba(102, 126, 234, 0.3)';
+            });
+            
+            bar.addEventListener('mouseleave', function() {
+                this.style.transform = 'scaleY(1)';
+                this.style.boxShadow = 'none';
+            });
+        });
+
+        // Add hover effects to GPA ranges
+        const gpaRanges = document.querySelectorAll('.gpa-range');
+        gpaRanges.forEach(range => {
+            range.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.boxShadow = '0 8px 25px rgba(102, 126, 234, 0.2)';
+            });
+            
+            range.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = 'none';
+            });
+        });
+    });
+
+    // Real-time updates simulation
+    function simulateLiveUpdates() {
+        setInterval(() => {
+            // Randomly update some risk scores
+            if (Math.random() < 0.3) { // 30% chance
+                updateRiskScores();
+            }
+
+            // Randomly update performance charts
+            if (Math.random() < 0.2) { // 20% chance
+                updatePerformanceCharts();
+            }
+        }, 30000); // Update every 30 seconds
+    }
+
+    // Start live updates
+    document.addEventListener('DOMContentLoaded', function() {
+        simulateLiveUpdates();
+    });
+</script>
+{% endblock %}

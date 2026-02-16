@@ -1,0 +1,324 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Manage Organizations - College ERP{% endblock %}
+
+{% block extra_css %}
+<style>
+    .orgs-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .create-org-btn {
+        background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+        color: white;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 15px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .create-org-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px rgba(86, 171, 47, 0.4);
+    }
+
+    .orgs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 2rem;
+    }
+
+    .org-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .org-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+        border-color: rgba(86, 171, 47, 0.3);
+    }
+
+    .org-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+    }
+
+    .org-name {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: white;
+        margin-bottom: 0.5rem;
+    }
+
+    .org-code {
+        background: rgba(86, 171, 47, 0.2);
+        color: #56ab2f;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.9rem;
+        font-weight: bold;
+        display: inline-block;
+    }
+
+    .org-status {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+
+    .org-status.active {
+        background: rgba(86, 171, 47, 0.2);
+        color: #56ab2f;
+    }
+
+    .org-status.inactive {
+        background: rgba(255, 107, 107, 0.2);
+        color: #ff6b6b;
+    }
+
+    .org-details {
+        margin-bottom: 1.5rem;
+    }
+
+    .org-detail {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        font-size: 0.95rem;
+    }
+
+    .org-detail i {
+        width: 20px;
+        margin-right: 0.75rem;
+        color: #a8e6cf;
+    }
+
+    .org-description {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        opacity: 0.9;
+    }
+
+    .org-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-item {
+        text-align: center;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        padding: 1rem;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #56ab2f;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        opacity: 0.8;
+    }
+
+    .org-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .action-btn {
+        flex: 1;
+        padding: 0.75rem;
+        border: none;
+        border-radius: 10px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        text-align: center;
+        font-size: 0.9rem;
+    }
+
+    .view-btn {
+        background: rgba(86, 171, 47, 0.2);
+        color: #56ab2f;
+        border: 1px solid #56ab2f;
+    }
+
+    .view-btn:hover {
+        background: rgba(86, 171, 47, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .edit-btn {
+        background: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+        border: 1px solid #ffc107;
+    }
+
+    .edit-btn:hover {
+        background: rgba(255, 193, 7, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        color: #a8e6cf;
+        margin-bottom: 1rem;
+    }
+
+    .empty-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: white;
+    }
+
+    .empty-description {
+        opacity: 0.8;
+        margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .orgs-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
+        }
+
+        .orgs-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .org-stats {
+            grid-template-columns: 1fr;
+        }
+
+        .org-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="orgs-header">
+    <h1 style="color: #a8e6cf; font-size: 2.5rem; font-weight: 900;">
+        <i class="fas fa-building"></i>
+        My Organizations
+    </h1>
+    <a href="/admin/create-organization" class="create-org-btn">
+        <i class="fas fa-plus"></i>
+        Create Organization
+    </a>
+</div>
+
+{% if organizations %}
+<div class="orgs-grid">
+    {% for org in organizations %}
+    <div class="org-card">
+        <div class="org-status {{ 'active' if org.is_active else 'inactive' }}">
+            {{ 'Active' if org.is_active else 'Inactive' }}
+        </div>
+        
+        <div class="org-header">
+            <div>
+                <div class="org-name">{{ org.name }}</div>
+                <div class="org-code">{{ org.code }}</div>
+            </div>
+        </div>
+
+        <div class="org-details">
+            <div class="org-detail">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>{{ org.location or 'Location not specified' }}</span>
+            </div>
+            <div class="org-detail">
+                <i class="fas fa-calendar"></i>
+                <span>Created {{ org.created_at.strftime('%d %b %Y') }}</span>
+            </div>
+        </div>
+
+        {% if org.description %}
+        <div class="org-description">
+            {{ org.description }}
+        </div>
+        {% endif %}
+
+        <div class="org-stats">
+            <div class="stat-item">
+                <div class="stat-value">{{ org.students_count or 0 }}</div>
+                <div class="stat-label">Students</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ org.applications_count or 0 }}</div>
+                <div class="stat-label">Applications</div>
+            </div>
+        </div>
+
+        <div class="org-actions">
+            <a href="/admin/organizations/{{ org.id }}" class="action-btn view-btn">
+                <i class="fas fa-eye"></i> View Details
+            </a>
+            <a href="/admin/organizations/{{ org.id }}/edit" class="action-btn edit-btn">
+                <i class="fas fa-edit"></i> Edit
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-icon">
+        <i class="fas fa-building"></i>
+    </div>
+    <div class="empty-title">No Organizations Yet</div>
+    <div class="empty-description">
+        Create your first organization to start managing students and applications.
+    </div>
+    <a href="/admin/create-organization" class="create-org-btn" style="display: inline-flex; margin: 0 auto;">
+        <i class="fas fa-plus"></i>
+        Create Your First Organization
+    </a>
+</div>
+{% endif %}
+{% endblock %}

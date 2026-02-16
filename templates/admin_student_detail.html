@@ -1,0 +1,394 @@
+{% extends "base_admin_sidebar.html" %}
+
+{% block title %}Student Details - College ERP{% endblock %}
+
+{% block extra_css %}
+<style>
+    .student-detail-container {
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: white;
+        text-decoration: none;
+        padding: 0.75rem 1.5rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .back-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .student-header {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 2rem;
+        align-items: center;
+    }
+
+    .student-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        font-weight: bold;
+        color: white;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .student-info h1 {
+        color: white;
+        margin: 0 0 0.5rem 0;
+        font-size: 2.5rem;
+    }
+
+    .student-info p {
+        color: rgba(255, 255, 255, 0.8);
+        margin: 0.25rem 0;
+        font-size: 1.1rem;
+    }
+
+    .student-status {
+        text-align: right;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.9rem;
+    }
+
+    .status-active {
+        background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+        color: white;
+    }
+
+    .status-inactive {
+        background: linear-gradient(135deg, #f39c12, #f1c40f);
+        color: white;
+    }
+
+    .status-graduated {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .info-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 15px;
+        padding: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+        color: white;
+        font-size: 1.3rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .info-label {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-value {
+        color: white;
+        font-weight: 500;
+        font-size: 1.1rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 1rem;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #56ab2f;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .risk-alert {
+        background: rgba(255, 107, 107, 0.1);
+        border: 1px solid #ff6b6b;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .risk-alert h4 {
+        color: #ff6b6b;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .risk-alert p {
+        color: rgba(255, 255, 255, 0.8);
+        margin: 0;
+    }
+
+    .attendance-chart {
+        height: 200px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .action-btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 10px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+        color: white;
+    }
+
+    .btn-warning {
+        background: linear-gradient(135deg, #f093fb, #f5576c);
+        color: white;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    @media (max-width: 768px) {
+        .student-header {
+            grid-template-columns: 1fr;
+            text-align: center;
+        }
+        
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="student-detail-container">
+    <a href="/admin/students" class="back-btn">
+        <i class="fas fa-arrow-left"></i>
+        Back to Students
+    </a>
+
+    <div class="student-header">
+        <div class="student-avatar">{{ student.name[0] }}</div>
+        <div class="student-info">
+            <h1>{{ student.name }}</h1>
+            <p><strong>Student ID:</strong> {{ student.student_id }}</p>
+            <p><strong>Course:</strong> {{ student.course }}</p>
+            <p><strong>Email:</strong> {{ student.email }}</p>
+            <p><strong>Phone:</strong> {{ student.phone }}</p>
+        </div>
+        <div class="student-status">
+            <span class="status-badge status-{{ student.status }}">{{ student.status.title() }}</span>
+        </div>
+    </div>
+
+    <div class="content-grid">
+        <div class="main-content">
+            <div class="info-card">
+                <h3 class="card-title">
+                    <i class="fas fa-graduation-cap"></i>
+                    Academic Information
+                </h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Course</span>
+                        <span class="info-value">{{ student.course }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Year</span>
+                        <span class="info-value">{{ student.year }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">GPA</span>
+                        <span class="info-value">{{ student.gpa }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Attendance</span>
+                        <span class="info-value">{{ student.attendance }}%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <h3 class="card-title">
+                    <i class="fas fa-chart-line"></i>
+                    Performance Analytics
+                </h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">{{ student.attendance }}%</div>
+                        <div class="stat-label">Attendance</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ student.gpa }}</div>
+                        <div class="stat-label">GPA</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">₹{{ student.fees_paid }}</div>
+                        <div class="stat-label">Fees Paid</div>
+                    </div>
+                </div>
+                <div class="attendance-chart">
+                    <i class="fas fa-chart-bar" style="font-size: 3rem; opacity: 0.3;"></i>
+                    <span style="margin-left: 1rem;">Attendance Chart</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-content">
+            <div class="info-card">
+                <h3 class="card-title">
+                    <i class="fas fa-user"></i>
+                    Personal Details
+                </h3>
+                <div class="info-item">
+                    <span class="info-label">Full Name</span>
+                    <span class="info-value">{{ student.name }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Email</span>
+                    <span class="info-value">{{ student.email }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Phone</span>
+                    <span class="info-value">{{ student.phone }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Date of Birth</span>
+                    <span class="info-value">{{ student.dob }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Address</span>
+                    <span class="info-value">{{ student.address }}</span>
+                </div>
+            </div>
+
+            {% if student.risk_score > 0.3 %}
+            <div class="risk-alert">
+                <h4><i class="fas fa-exclamation-triangle"></i> Dropout Risk Alert</h4>
+                <p>This student has a {{ (student.risk_score * 100)|round }}% risk of dropping out. Consider intervention.</p>
+            </div>
+            {% endif %}
+
+            <div class="info-card">
+                <h3 class="card-title">
+                    <i class="fas fa-cog"></i>
+                    Quick Actions
+                </h3>
+                <div class="action-buttons">
+                    <a href="/admin/students/{{ student.id }}/attendance" class="action-btn btn-primary">
+                        <i class="fas fa-calendar-check"></i>
+                        View Attendance
+                    </a>
+                    <a href="/admin/students/{{ student.id }}/edit" class="action-btn btn-warning">
+                        <i class="fas fa-edit"></i>
+                        Edit Details
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

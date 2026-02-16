@@ -1,0 +1,735 @@
+{% extends "base.html" %}
+
+{% block title %}Admissions - College ERP System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admissions-container {
+        padding: 2rem 0;
+        min-height: calc(100vh - 80px);
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        animation: fadeInDown 1s ease-out;
+    }
+
+    .page-title {
+        font-size: 3rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+    }
+
+    .page-subtitle {
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 400;
+    }
+
+    /* Search and Filter Section */
+    .search-section {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideInUp 0.8s ease-out;
+    }
+
+    .search-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        align-items: end;
+    }
+
+    .search-input {
+        position: relative;
+    }
+
+    .search-input i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #667eea;
+        z-index: 1;
+    }
+
+    .search-input input {
+        padding-left: 3rem;
+    }
+
+    /* Students Table */
+    .students-section {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideInUp 0.8s ease-out;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Enhanced Table Styles */
+    .table-container {
+        overflow-x: auto;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .table th {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        font-weight: 600;
+        padding: 1.5rem 1rem;
+        text-align: left;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .table td {
+        padding: 1.5rem 1rem;
+        border-bottom: 1px solid #f0f0f0;
+        vertical-align: middle;
+    }
+
+    .table tr {
+        transition: all 0.3s ease;
+    }
+
+    .table tr:hover {
+        background: rgba(102, 126, 234, 0.05);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .table tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Student ID Badge */
+    .student-id {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        display: inline-block;
+    }
+
+    /* Status Badges */
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-active {
+        background: rgba(86, 171, 47, 0.1);
+        color: #56ab2f;
+        border: 2px solid rgba(86, 171, 47, 0.2);
+    }
+
+    .status-graduated {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        border: 2px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .status-dropped_out {
+        background: rgba(255, 65, 108, 0.1);
+        color: #ff416c;
+        border: 2px solid rgba(255, 65, 108, 0.2);
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-view {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        border: 1px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .btn-view:hover {
+        background: #667eea;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-edit {
+        background: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+        border: 1px solid rgba(255, 193, 7, 0.2);
+    }
+
+    .btn-edit:hover {
+        background: #ffc107;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-delete {
+        background: rgba(255, 65, 108, 0.1);
+        color: #ff416c;
+        border: 1px solid rgba(255, 65, 108, 0.2);
+    }
+
+    .btn-delete:hover {
+        background: #ff416c;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    /* GPA Display */
+    .gpa-display {
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .gpa-excellent {
+        color: #56ab2f;
+    }
+
+    .gpa-good {
+        color: #ffc107;
+    }
+
+    .gpa-average {
+        color: #ff9800;
+    }
+
+    .gpa-poor {
+        color: #ff416c;
+    }
+
+    /* Attendance Display */
+    .attendance-display {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .attendance-bar {
+        width: 60px;
+        height: 8px;
+        background: rgba(102, 126, 234, 0.1);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .attendance-fill {
+        height: 100%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        transition: width 0.3s ease;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .search-form {
+            grid-template-columns: 1fr;
+        }
+
+        .section-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
+        }
+
+        .table-container {
+            font-size: 0.8rem;
+        }
+
+        .table th,
+        .table td {
+            padding: 1rem 0.5rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+    }
+
+    /* Loading States */
+    .loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #666;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        color: #ccc;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: #333;
+    }
+
+    .empty-state p {
+        font-size: 1rem;
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admissions-container">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-user-plus"></i> Student Admissions
+            </h1>
+            <p class="page-subtitle">Manage student admissions and academic records</p>
+        </div>
+
+        <!-- Search and Filter Section -->
+        <div class="search-section">
+            <form class="search-form" id="searchForm">
+                <div class="form-group">
+                    <label class="form-label">Search Students</label>
+                    <div class="search-input">
+                        <i class="fas fa-search"></i>
+                        <input type="text" class="form-control" id="searchInput" placeholder="Search by name, ID, or course...">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Filter by Course</label>
+                    <select class="form-control" id="courseFilter">
+                        <option value="">All Courses</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Mechanical">Mechanical</option>
+                        <option value="Civil">Civil</option>
+                        <option value="Electrical">Electrical</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Filter by Year</label>
+                    <select class="form-control" id="yearFilter">
+                        <option value="">All Years</option>
+                        <option value="1">First Year</option>
+                        <option value="2">Second Year</option>
+                        <option value="3">Third Year</option>
+                        <option value="4">Fourth Year</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Filter by Status</label>
+                    <select class="form-control" id="statusFilter">
+                        <option value="">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="graduated">Graduated</option>
+                        <option value="dropped_out">Dropped Out</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <button type="button" class="btn btn-primary" onclick="filterStudents()">
+                        <i class="fas fa-filter"></i> Apply Filters
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Students Section -->
+        <div class="students-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-users"></i> Student Records
+                    <span class="badge" style="background: rgba(102, 126, 234, 0.1); color: #667eea; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; margin-left: 0.5rem;">
+                        {{ students|length }} Students
+                    </span>
+                </h2>
+                <a href="{{ url_for('new_admission') }}" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i> New Admission
+                </a>
+            </div>
+
+            {% if students %}
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Name</th>
+                            <th>Course</th>
+                            <th>Year</th>
+                            <th>GPA</th>
+                            <th>Attendance</th>
+                            <th>Status</th>
+                            <th>Admission Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTableBody">
+                        {% for student in students %}
+                        <tr class="student-row" 
+                            data-name="{{ student.name.lower() }}" 
+                            data-course="{{ student.course }}" 
+                            data-year="{{ student.year }}" 
+                            data-status="{{ student.status }}">
+                            <td>
+                                <span class="student-id">{{ student.student_id }}</span>
+                            </td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
+                                        {{ student.name[0].upper() }}
+                                    </div>
+                                    <div>
+                                        <div style="font-weight: 600; color: #333;">{{ student.name }}</div>
+                                        <div style="font-size: 0.8rem; color: #666;">{{ student.email }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span style="background: rgba(102, 126, 234, 0.1); color: #667eea; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500;">
+                                    {{ student.course }}
+                                </span>
+                            </td>
+                            <td>
+                                <span style="background: rgba(255, 193, 7, 0.1); color: #ffc107; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">
+                                    Year {{ student.year }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="gpa-display 
+                                    {% if student.gpa >= 8.0 %}gpa-excellent
+                                    {% elif student.gpa >= 6.5 %}gpa-good
+                                    {% elif student.gpa >= 5.0 %}gpa-average
+                                    {% else %}gpa-poor{% endif %}">
+                                    {{ "%.2f"|format(student.gpa) }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="attendance-display">
+                                    <span style="font-weight: 600; min-width: 35px;">{{ "%.1f"|format(student.attendance_percentage) }}%</span>
+                                    <div class="attendance-bar">
+                                        <div class="attendance-fill" style="width: {{ student.attendance_percentage }}%;"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="status-badge status-{{ student.status }}">
+                                    {{ student.status.replace('_', ' ').title() }}
+                                </span>
+                            </td>
+                            <td>
+                                <span style="color: #666; font-size: 0.9rem;">
+                                    {{ student.admission_date.strftime('%b %d, %Y') }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a href="#" class="btn-sm btn-view" onclick="viewStudent('{{ student.student_id }}')" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="#" class="btn-sm btn-edit" onclick="editStudent('{{ student.student_id }}')" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="#" class="btn-sm btn-delete" onclick="deleteStudent('{{ student.student_id }}')" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-user-plus"></i>
+                <h3>No Students Found</h3>
+                <p>Start by adding your first student admission to the system.</p>
+                <a href="{{ url_for('new_admission') }}" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i> Add First Student
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Student Details Modal -->
+<div id="studentModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5);">
+    <div class="modal-content" style="background: white; margin: 5% auto; padding: 2rem; border-radius: 20px; width: 90%; max-width: 600px; position: relative; animation: slideInDown 0.3s ease-out;">
+        <span class="close" onclick="closeModal()" style="position: absolute; right: 1rem; top: 1rem; font-size: 2rem; cursor: pointer; color: #666;">&times;</span>
+        <div id="modalContent"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Filter and search functionality
+    function filterStudents() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const courseFilter = document.getElementById('courseFilter').value;
+        const yearFilter = document.getElementById('yearFilter').value;
+        const statusFilter = document.getElementById('statusFilter').value;
+        
+        const rows = document.querySelectorAll('.student-row');
+        let visibleCount = 0;
+        
+        rows.forEach(row => {
+            const name = row.dataset.name;
+            const course = row.dataset.course;
+            const year = row.dataset.year;
+            const status = row.dataset.status;
+            
+            const matchesSearch = name.includes(searchTerm) || 
+                                row.querySelector('.student-id').textContent.toLowerCase().includes(searchTerm);
+            const matchesCourse = !courseFilter || course === courseFilter;
+            const matchesYear = !yearFilter || year === yearFilter;
+            const matchesStatus = !statusFilter || status === statusFilter;
+            
+            if (matchesSearch && matchesCourse && matchesYear && matchesStatus) {
+                row.style.display = '';
+                visibleCount++;
+                // Add animation
+                row.style.animation = 'fadeInUp 0.3s ease-out';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Update badge count
+        const badge = document.querySelector('.badge');
+        if (badge) {
+            badge.textContent = `${visibleCount} Students`;
+        }
+        
+        // Show empty state if no results
+        const tableBody = document.getElementById('studentsTableBody');
+        if (visibleCount === 0) {
+            if (!document.querySelector('.no-results')) {
+                const noResults = document.createElement('tr');
+                noResults.className = 'no-results';
+                noResults.innerHTML = `
+                    <td colspan="9" style="text-align: center; padding: 3rem; color: #666;">
+                        <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 1rem; color: #ccc;"></i>
+                        <h3>No students found matching your criteria</h3>
+                        <p>Try adjusting your search terms or filters</p>
+                    </td>
+                `;
+                tableBody.appendChild(noResults);
+            }
+        } else {
+            const noResults = document.querySelector('.no-results');
+            if (noResults) {
+                noResults.remove();
+            }
+        }
+    }
+
+    // Real-time search
+    document.getElementById('searchInput').addEventListener('input', filterStudents);
+    document.getElementById('courseFilter').addEventListener('change', filterStudents);
+    document.getElementById('yearFilter').addEventListener('change', filterStudents);
+    document.getElementById('statusFilter').addEventListener('change', filterStudents);
+
+    // View student details
+    function viewStudent(studentId) {
+        // Find the student data
+        const row = document.querySelector(`tr[data-name*="${studentId}"]`) || 
+                   Array.from(document.querySelectorAll('.student-row')).find(row => 
+                       row.querySelector('.student-id').textContent === studentId);
+        
+        if (row) {
+            const studentIdEl = row.querySelector('.student-id').textContent;
+            const name = row.querySelector('td:nth-child(2) div div').textContent;
+            const email = row.querySelector('td:nth-child(2) div div:nth-child(2)').textContent;
+            const course = row.querySelector('td:nth-child(3) span').textContent;
+            const year = row.querySelector('td:nth-child(4) span').textContent;
+            const gpa = row.querySelector('td:nth-child(5) span').textContent;
+            const attendance = row.querySelector('td:nth-child(6) span').textContent;
+            const status = row.querySelector('td:nth-child(7) span').textContent;
+            const admissionDate = row.querySelector('td:nth-child(8) span').textContent;
+            
+            const modalContent = `
+                <h2 style="color: #333; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-user-graduate"></i> Student Details
+                </h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+                    <div>
+                        <label style="font-weight: 600; color: #666; font-size: 0.9rem;">Student ID</label>
+                        <div style="background: rgba(102, 126, 234, 0.1); padding: 0.5rem; border-radius: 8px; margin-top: 0.25rem;">${studentIdEl}</div>
+                    </div>
+                    <div>
+                        <label style="font-weight: 600; color: #666; font-size: 0.9rem;">Name</label>
+                        <div style="background: rgba(102, 126, 234, 0.1); padding: 0.5rem; border-radius: 8px; margin-top: 0.25rem;">${name}</div>
+                    </div>
+                    <div>
+                        <label style="font-weight: 600; color: #666; font-size: 0.9rem;">Email</label>
+                        <div style="background: rgba(102, 126, 234, 0.1); padding: 0.5rem; border-radius: 8px; margin-top: 0.25rem;">${email}</div>
+                    </div>
+                    <div>
+                        <label style="font-weight: 600; color: #666; font-size: 0.9rem;">Course</label>
+                        <div style="background: rgba(102, 126, 234, 0.1); padding: 0.5rem; border-radius: 8px; margin-top: 0.25rem;">${course}</div>
+                    </div>
+                    <div>
+                        <label style="font-weight: 600; color: #666; font-size: 0.9rem;">Year</label>
+                        <div style="background: rgba(102, 126, 234, 0.1); padding: 0.5rem; border-radius: 8px; margin-top: 0.25rem;">${year}</div>
+                    </div>
+                    <div>
+                        <label style="font-weight: 600; color: #666; font-size: 0.9rem;">GPA</label>
+                        <div style="background: rgba(102, 126, 234, 0.1); padding: 0.5rem; border-radius: 8px; margin-top: 0.25rem;">${gpa}</div>
+                    </div>
+                    <div>
+                        <label style="font-weight: 600; color: #666; font-size: 0.9rem;">Attendance</label>
+                        <div style="background: rgba(102, 126, 234, 0.1); padding: 0.5rem; border-radius: 8px; margin-top: 0.25rem;">${attendance}</div>
+                    </div>
+                    <div>
+                        <label style="font-weight: 600; color: #666; font-size: 0.9rem;">Status</label>
+                        <div style="background: rgba(102, 126, 234, 0.1); padding: 0.5rem; border-radius: 8px; margin-top: 0.25rem;">${status}</div>
+                    </div>
+                </div>
+                <div style="text-align: center;">
+                    <button onclick="closeModal()" class="btn btn-primary">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+            `;
+            
+            document.getElementById('modalContent').innerHTML = modalContent;
+            document.getElementById('studentModal').style.display = 'block';
+        }
+    }
+
+    // Edit student
+    function editStudent(studentId) {
+        // In a real application, this would redirect to an edit form
+        alert(`Edit functionality for student ${studentId} would be implemented here.`);
+    }
+
+    // Delete student
+    function deleteStudent(studentId) {
+        if (confirm(`Are you sure you want to delete student ${studentId}? This action cannot be undone.`)) {
+            // In a real application, this would make an API call to delete the student
+            alert(`Delete functionality for student ${studentId} would be implemented here.`);
+        }
+    }
+
+    // Close modal
+    function closeModal() {
+        document.getElementById('studentModal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('studentModal');
+        if (event.target === modal) {
+            closeModal();
+        }
+    }
+
+    // Add animations to table rows
+    document.addEventListener('DOMContentLoaded', function() {
+        const rows = document.querySelectorAll('.student-row');
+        rows.forEach((row, index) => {
+            row.style.animationDelay = `${index * 0.05}s`;
+            row.classList.add('animate-fadeInUp');
+        });
+    });
+
+    // Add hover effects
+    document.querySelectorAll('.student-row').forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+            this.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
+        });
+        
+        row.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = 'none';
+        });
+    });
+</script>
+{% endblock %}
